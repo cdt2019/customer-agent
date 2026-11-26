@@ -1,0 +1,398 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>切块实验室 · 效果图</title>
+<style>
+  :root {
+    --ink: #14172b; --ink-2: #545a78; --ink-3: #8e93ad;
+    --blue: #2d5bff; --blue-deep: #1b3fe0; --blue-soft: #e8edff;
+    --chip: #eceefa; --card: #ffffff; --tile: #f6f7fd; --hair: rgba(38, 48, 110, .07);
+    --up: #12996a; --down: #e0475c;
+    --shadow: 0 1px 2px rgba(38, 48, 110, .04), 0 12px 32px -14px rgba(38, 48, 110, .18);
+    --shadow-blue: 0 14px 26px -12px rgba(36, 76, 245, .6);
+    --num: "Segoe UI Variable Display", "Segoe UI", system-ui, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    margin: 0; color: var(--ink); overflow: hidden;
+    font: 14px/1.55 "Segoe UI", "Microsoft YaHei UI", "PingFang SC", sans-serif;
+    background: linear-gradient(180deg, #c6cbf0 0, #dfe2f7 150px, #f3f4fc 340px, #fafbff 100%) fixed;
+    -webkit-font-smoothing: antialiased;
+  }
+  svg.i { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+  button { font: inherit; color: inherit; border: 0; background: none; cursor: pointer; padding: 0; }
+  button:focus-visible, textarea:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+
+  .app { display: grid; --nav: 232px; --chat: 410px; grid-template-columns: var(--nav) var(--chat) minmax(0, 1fr); height: 100vh; }
+
+  /* 左侧菜单 */
+  .rail { height: 100vh; min-width: 0; background: rgba(255, 255, 255, .66); backdrop-filter: blur(16px); border-right: 1px solid rgba(38, 48, 110, .08); display: flex; flex-direction: column; padding: 14px 10px 10px; position: relative; z-index: 3; }
+  .brand { display: flex; align-items: center; gap: 9px; padding: 2px 4px 12px 6px; }
+  .logo { width: 30px; height: 30px; border-radius: 10px; background: linear-gradient(145deg, #4a76ff, var(--blue-deep)); color: #fff; display: grid; place-items: center; box-shadow: 0 8px 14px -7px rgba(36, 76, 245, .7); flex: none; }
+  .logo svg.i { width: 16px; height: 16px; }
+  .brand b { font-size: 16px; font-weight: 700; letter-spacing: -.01em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1; min-width: 0; }
+  .navbtn { width: 28px; height: 28px; border-radius: 9px; display: grid; place-items: center; color: var(--ink-3); flex: none; }
+  .navbtn:hover { background: var(--chip); color: var(--ink); }
+  .navbtn svg.i { width: 17px; height: 17px; }
+  .proj { width: 100%; display: flex; align-items: center; gap: 9px; text-align: left; background: #fff; border-radius: 13px; padding: 7px 9px; box-shadow: 0 1px 2px rgba(38, 48, 110, .06), 0 6px 14px -10px rgba(38, 48, 110, .3); margin-bottom: 8px; }
+  .proj i { width: 28px; height: 28px; border-radius: 9px; background: var(--blue-soft); color: var(--blue); font-style: normal; font-weight: 700; font-size: 13px; display: grid; place-items: center; flex: none; }
+  .proj span { flex: 1; min-width: 0; font-size: 11px; color: var(--ink-3); line-height: 1.25; }
+  .proj b { display: block; font-size: 13.5px; font-weight: 600; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .proj > svg.i { width: 14px; height: 14px; color: var(--ink-3); }
+  .menu { flex: 1; min-height: 0; overflow-y: auto; overflow-x: hidden; }
+  .menu h6 { margin: 12px 8px 3px; font-size: 11px; line-height: 1.5; letter-spacing: .05em; color: var(--ink-3); font-weight: 600; white-space: nowrap; }
+  .rail a { position: relative; display: flex; align-items: center; gap: 10px; height: 36px; padding: 0 10px; margin-bottom: 2px; border-radius: 11px; color: var(--ink-2); text-decoration: none; white-space: nowrap; transition: background .12s, color .12s; }
+  .rail a svg.i { width: 17px; height: 17px; stroke-width: 1.8; }
+  .rail a:hover { background: rgba(38, 48, 110, .05); color: var(--ink); }
+  .rail a:focus-visible { outline: 2px solid var(--blue); outline-offset: -2px; }
+  .rail a.on { background: var(--blue-soft); color: var(--blue); font-weight: 600; }
+  .rail a em { margin-left: auto; font-style: normal; font-size: 10.5px; font-weight: 400; color: var(--ink-3); background: var(--chip); border-radius: 6px; padding: 0 5px; }
+  .dock { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; margin: 8px 0; }
+  .dock button { height: 32px; border-radius: 10px; background: #fff; color: var(--ink-2); display: grid; place-items: center; box-shadow: 0 1px 2px rgba(38, 48, 110, .07); }
+  .dock button:hover { color: var(--blue); }
+  .dock svg.i { width: 16px; height: 16px; }
+  .me-card { display: flex; align-items: center; gap: 8px; background: #fff; border-radius: 13px; padding: 7px 9px; font-size: 13px; color: var(--ink-2); box-shadow: 0 1px 2px rgba(38, 48, 110, .06); }
+  .me-card i { width: 26px; height: 26px; border-radius: 50%; background: linear-gradient(145deg, #4a76ff, var(--blue-deep)); color: #fff; font-style: normal; font-size: 12px; font-weight: 600; display: grid; place-items: center; flex: none; }
+  .me-card span { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .me-card small { font-size: 10.5px; font-weight: 600; color: var(--ink-3); }
+
+  .app.navfold .rail { padding: 14px 9px 10px; align-items: center; }
+  .app.navfold .brand { flex-direction: column; padding: 0 0 8px; }
+  .app.navfold .brand b, .app.navfold .proj span, .app.navfold .proj > svg.i, .app.navfold .menu h6, .app.navfold .rail a em, .app.navfold .me-card span, .app.navfold .me-card small { display: none; }
+  .app.navfold .proj { width: 40px; padding: 6px; justify-content: center; }
+  .app.navfold .menu { width: 100%; overflow: visible; }
+  .app.navfold .menu .grp + .grp { border-top: 1px solid var(--hair); margin-top: 6px; padding-top: 6px; }
+  .app.navfold .rail a { width: 36px; padding: 0; margin-inline: auto; justify-content: center; }
+  .app.navfold .rail a span { position: absolute; left: 44px; top: 50%; transform: translateY(-50%); background: var(--ink); color: #fff; font-size: 12px; font-weight: 400; line-height: 1; padding: 6px 8px; border-radius: 7px; opacity: 0; pointer-events: none; transition: opacity .1s; }
+  .app.navfold .rail a:hover span, .app.navfold .rail a:focus-visible span { opacity: 1; }
+  .app.navfold .dock { grid-template-columns: 1fr; width: 34px; }
+  .app.navfold .dock button:not(.keep) { display: none; }
+  .app.navfold .me-card { padding: 4px; }
+
+  
+  .app { grid-template-columns: var(--nav) minmax(0, 1fr); }
+  .page { height: 100vh; min-width: 0; display: flex; flex-direction: column; padding: 14px 20px; }
+  .head { flex: none; display: flex; align-items: center; gap: 8px; margin: 2px 2px 12px; flex-wrap: wrap; }
+  .head h1 { font-size: 22px; line-height: 1.2; margin: 0 6px 0 0; font-weight: 700; letter-spacing: -.01em; white-space: nowrap; }
+  .pick { background: rgba(255, 255, 255, .72); border-radius: 12px; height: 34px; padding: 0 12px; display: inline-flex; gap: 6px; align-items: center; font-size: 13px; color: var(--ink-2); white-space: nowrap; }
+  .pick b { color: var(--ink); font-weight: 600; }
+  .pick svg.i { width: 14px; height: 14px; }
+  .pick.sel { background: #fff; color: var(--blue); font-weight: 600; box-shadow: 0 1px 2px rgba(38, 48, 110, .08); }
+  .sp { flex: 1; }
+  .primary { height: 36px; padding: 0 20px; border-radius: 12px; color: #fff; font-weight: 600; background: linear-gradient(100deg, #4170ff, var(--blue-deep)); box-shadow: 0 10px 18px -10px rgba(36, 76, 245, .75); white-space: nowrap; }
+  .primary:active { transform: translateY(1px); }
+  .strip { flex: none; display: grid; gap: 9px; height: 72px; margin-bottom: 12px; }
+  .mini { background: var(--card); border-radius: 18px; box-shadow: var(--shadow); min-width: 0; padding: 0 14px; display: flex; flex-direction: column; justify-content: center; overflow: hidden; }
+  .mini > span { font-size: 11.5px; color: var(--ink-3); line-height: 1.35; white-space: nowrap; }
+  .mini b { font-family: var(--num); font-size: 19px; line-height: 1.25; font-weight: 700; white-space: nowrap; }
+  .mini b small { font-size: 11px; font-weight: 500; color: var(--ink-2); margin-left: 2px; }
+  .mini.hero { color: #fff; background: radial-gradient(120% 160% at 88% 0, #6f92ff 0, transparent 56%), linear-gradient(105deg, #2f5eff, var(--blue-deep)); box-shadow: 0 12px 20px -12px rgba(36, 76, 245, .7); }
+  .mini.hero > span { color: rgba(255, 255, 255, .85); }
+  .mini.hero b small { color: rgba(255, 255, 255, .85); }
+  .panel { background: var(--card); border-radius: 24px; box-shadow: var(--shadow); min-height: 0; min-width: 0; display: flex; flex-direction: column; overflow: hidden; }
+  .tabs { display: flex; gap: 24px; padding: 13px 20px 0; border-bottom: 1px solid var(--hair); flex: none; overflow-x: auto; }
+  .tab { padding: 2px 1px 9px; font-size: 14px; color: var(--ink-3); border-bottom: 2.5px solid transparent; margin-bottom: -1px; white-space: nowrap; }
+  .tab:hover { color: var(--ink-2); }
+  .tab.on { color: var(--blue); border-color: var(--blue); font-weight: 600; }
+  .c { background: var(--chip); color: var(--ink-2); border-radius: 8px; padding: 0 8px; font-size: 12px; white-space: nowrap; }
+  .note { flex: none; margin: 8px 2px 0; font-size: 11.5px; color: var(--ink-3); }
+  .scroll { overflow: auto; flex: 1; min-height: 0; }
+
+  .seg-ctl { display: inline-flex; background: var(--chip); border-radius: 11px; padding: 3px; gap: 2px; }
+  .seg-ctl button { height: 28px; padding: 0 11px; border-radius: 8px; color: var(--ink-2); font-size: 13px; white-space: nowrap; }
+  .seg-ctl button.on { background: #fff; color: var(--blue); font-weight: 600; box-shadow: 0 1px 3px rgba(38, 48, 110, .14); }
+  .state { font-size: 12px; font-weight: 600; white-space: nowrap; }
+  .s-run { color: var(--blue); } .s-ok { color: var(--up); } .s-bad { color: var(--down); } .s-wait { color: var(--ink-3); } .s-check { color: #9a6200; }
+  .btn2 { height: 32px; padding: 0 12px; border-radius: 10px; background: var(--chip); color: var(--ink-2); font-size: 13px; white-space: nowrap; }
+  .btn2:hover { background: var(--blue-soft); color: var(--blue); }
+
+  .strip { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+  .mini em { font-style: normal; font-size: 11.5px; font-weight: 600; margin-left: 5px; }
+  .mini em.up { color: var(--up); } .mini em.dn { color: var(--down); } .mini em.eq { color: var(--ink-3); }
+  .mini.hero em { color: #fff !important; }
+  .work { flex: 1; min-height: 0; display: grid; grid-template-columns: 276px minmax(0, 1fr) 330px; gap: 12px; }
+  .params { padding: 14px 16px; overflow: auto; }
+  .params h2, .ptitle { margin: 0 0 10px; font-size: 15px; font-weight: 700; }
+  .fld { margin-bottom: 15px; }
+  .fld > label, .fld > span.l { display: flex; justify-content: space-between; font-size: 13px; color: var(--ink-2); margin-bottom: 5px; }
+  .fld b { font-family: var(--num); color: var(--ink); }
+  .fld select { width: 100%; height: 36px; border: 0; border-radius: 11px; background: var(--tile); padding: 0 10px; font: inherit; color: var(--ink); outline-offset: 1px; }
+  .fld input[type=range] { width: 100%; accent-color: var(--blue); margin: 0; }
+  .fld small { display: block; color: var(--ink-3); font-size: 12px; margin-top: 4px; line-height: 1.5; }
+  .seg-ctl { display: flex; } .seg-ctl button { flex: 1; padding: 0 4px; }
+  .check { display: flex; align-items: center; gap: 7px; font-size: 13px; color: var(--ink-2); margin-bottom: 9px; }
+  .check input { accent-color: var(--blue); }
+  .ptop { flex: none; display: flex; align-items: center; gap: 8px; padding: 13px 18px 10px; border-bottom: 1px solid var(--hair); }
+  .ptop h2 { margin: 0; font-size: 15px; font-weight: 700; white-space: nowrap; }
+  .ptop span { color: var(--ink-3); font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .preview { padding: 12px 16px 16px; line-height: 1.85; font-size: 13.5px; }
+  .blk { display: block; padding: 7px 10px; border-radius: 10px; margin-bottom: 5px; background: #f1f4ff; border-left: 3px solid #8ea6ff; white-space: pre-wrap; overflow-wrap: anywhere; transition: background .1s; }
+  .blk:nth-child(even) { background: #f7f5fe; border-left-color: #b7a9ee; }
+  .blk.hl { background: #dce5ff; border-left-color: var(--blue); }
+  .blk mark { background: #ffe9b0; color: inherit; border-radius: 3px; }
+  .blk i { font-style: normal; color: var(--blue); font-size: 12px; font-weight: 600; }
+  .list { padding: 9px 10px; }
+  .ck { width: 100%; text-align: left; display: block; padding: 8px 11px; border-radius: 13px; background: var(--tile); margin-bottom: 6px; transition: background .1s; }
+  .ck:hover, .ck.hl { background: var(--blue-soft); }
+  .ck .r { display: flex; align-items: center; gap: 7px; }
+  .ck .no { width: 22px; height: 22px; border-radius: 7px; background: #fff; display: grid; place-items: center; font-family: var(--num); font-weight: 700; font-size: 11.5px; color: var(--ink-2); flex: none; }
+  .ck .p { flex: 1; min-width: 0; font-size: 12.5px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .ck .len { font-family: var(--num); font-size: 12.5px; font-weight: 700; white-space: nowrap; }
+  .ck .len.warn { color: var(--down); }
+  .ck .barx { display: block; height: 4px; border-radius: 9px; background: #e3e7f8; margin-top: 6px; overflow: hidden; }
+  .ck .barx i { display: block; height: 100%; background: linear-gradient(90deg, #6f92ff, var(--blue-deep)); }
+  .ck .barx i.warn { background: var(--down); }
+  @media (max-width: 1360px) { .work { grid-template-columns: 250px minmax(0, 1fr) 260px; } }
+  @media (max-width: 1240px) { .strip { grid-template-columns: repeat(3, minmax(0, 1fr)); grid-auto-rows: 58px; height: auto; } .work { grid-template-columns: 230px minmax(0, 1fr); } .chunks-panel { display: none; } }
+  @media (max-width: 860px) { body { overflow: auto; } .app { height: auto; } .rail { position: sticky; top: 0; } .page { height: auto; } .work { grid-template-columns: minmax(0, 1fr); } .chunks-panel { display: flex; max-height: 360px; } }
+
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="spark" viewBox="0 0 24 24"><path d="M12 3l1.900 5.100L19 10l-5.100 1.900L12 17l-1.900-5.100L5 10l5.100-1.900z"/><path d="M19 16l.7 1.800 1.800.7-1.800.7-.7 1.800-.7-1.800-1.800-.7 1.800-.7z"/></symbol>
+  <symbol id="book" viewBox="0 0 24 24"><path d="M4 5.500A2.500 2.500 0 0 1 6.500 3H20v15H6.500A2.500 2.500 0 0 0 4 20.500z"/><path d="M4 20.500A2.500 2.500 0 0 0 6.500 21H20v-3"/></symbol>
+  <symbol id="flask" viewBox="0 0 24 24"><path d="M9 3h6M10 3v6l-5.400 9A2 2 0 0 0 6.300 21h11.400a2 2 0 0 0 1.700-3L14 9V3"/><path d="M7.500 15h9"/></symbol>
+  <symbol id="chart" viewBox="0 0 24 24"><path d="M4 20V4M4 20h16"/><rect x="8" y="11" width="3" height="6" rx="1"/><rect x="14" y="7" width="3" height="10" rx="1"/></symbol>
+  <symbol id="chat" viewBox="0 0 24 24"><path d="M21 12a8 8 0 0 1-11.600 7.100L4 20l1-4.600A8 8 0 1 1 21 12z"/></symbol>
+  <symbol id="gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19 12l2-1-1.500-3.200-2.200.5-1.600-1.600.5-2.200L13 3l-1 2-1-2-3.200 1.500.5 2.200-1.600 1.600-2.200-.5L3 11l2 1-2 1 1.500 3.200 2.200-.5 1.600 1.600-.5 2.200L11 21l1-2 1 2 3.200-1.500-.5-2.200 1.600-1.600 2.200.5L21 13z"/></symbol>
+  <symbol id="pen" viewBox="0 0 24 24"><path d="M4 20l1-4L16 5a2.100 2.100 0 0 1 3 3L8 19z"/><path d="M14 7l3 3"/></symbol>
+  <symbol id="brain" viewBox="0 0 24 24"><circle cx="5" cy="6" r="2"/><circle cx="19" cy="6" r="2"/><circle cx="12" cy="12" r="2.400"/><circle cx="5" cy="18" r="2"/><circle cx="19" cy="18" r="2"/><path d="M6.600 7.200l3.500 3.300M17.400 7.200l-3.500 3.300M6.600 16.800l3.500-3.300M17.400 16.800l-3.500-3.300"/></symbol>
+  <symbol id="key" viewBox="0 0 24 24"><path d="M4 7V5h16v2M12 5v14M9 19h6"/></symbol>
+  <symbol id="merge" viewBox="0 0 24 24"><path d="M6 4v4a6 6 0 0 0 12 0V4"/><path d="M12 14v7M9 18l3 3 3-3"/></symbol>
+  <symbol id="sort" viewBox="0 0 24 24"><path d="M7 4v16M3.500 16.500L7 20l3.500-3.500"/><path d="M14 6h7M14 12h5M14 18h3"/></symbol>
+  <symbol id="send" viewBox="0 0 24 24"><path d="M21 3L10 14M21 3l-7 18-4-7-7-4z"/></symbol>
+  <symbol id="right" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></symbol>
+  <symbol id="left" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></symbol>
+  <symbol id="down" viewBox="0 0 24 24"><path d="M5 9l7 7 7-7"/></symbol>
+  <symbol id="panel" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M9 4v16M16 10l-2 2 2 2"/></symbol>
+  <symbol id="headset" viewBox="0 0 24 24"><path d="M4 14v-2a8 8 0 0 1 16 0v2"/><rect x="3" y="14" width="4" height="6" rx="1.500"/><rect x="17" y="14" width="4" height="6" rx="1.500"/><path d="M19 20a3 3 0 0 1-3 2h-3"/></symbol>
+  <symbol id="coin" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M15 9.500c-.5-1.200-1.600-1.800-3-1.800-1.700 0-3 .9-3 2.200 0 3 6 1.500 6 4.300 0 1.300-1.300 2.100-3 2.100-1.500 0-2.700-.7-3.100-1.900M12 6v12"/></symbol>
+  <symbol id="plug" viewBox="0 0 24 24"><path d="M9 3v5M15 3v5M6 8h12v3a6 6 0 0 1-12 0zM12 17v4"/></symbol>
+  <symbol id="bell" viewBox="0 0 24 24"><path d="M6 10a6 6 0 0 1 12 0c0 6 2.500 7 2.500 7h-17S6 16 6 10z"/><path d="M10 20a2.200 2.200 0 0 0 4 0"/></symbol>
+  <symbol id="find" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.500-3.500"/></symbol>
+  <symbol id="lock" viewBox="0 0 24 24"><circle cx="8" cy="15" r="4.500"/><path d="M11.200 11.800L20 3M16 7l3 3"/></symbol>
+  <symbol id="db" viewBox="0 0 24 24"><ellipse cx="12" cy="5.500" rx="8" ry="3"/><path d="M4 5.500v13c0 1.700 3.600 3 8 3s8-1.300 8-3v-13M4 12c0 1.700 3.600 3 8 3s8-1.300 8-3"/></symbol>
+  <symbol id="upload" viewBox="0 0 24 24"><path d="M12 16V4M7 9l5-5 5 5M4 16v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/></symbol>
+  <symbol id="cut" viewBox="0 0 24 24"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M20 4L8.100 15.900M14.500 14.500L20 20M8.100 8.100L12 12"/></symbol>
+  <symbol id="tasks" viewBox="0 0 24 24"><path d="M9 6h11M9 12h11M9 18h11M3.500 6l1 1 2-2M3.500 12l1 1 2-2M3.500 18l1 1 2-2"/></symbol>
+  <symbol id="x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+</svg>
+
+<div class="app">
+  <nav class="rail" aria-label="主导航">
+    <div class="brand">
+      <div class="logo"><svg class="i"><use href="#spark"/></svg></div>
+      <b>Customer Agent</b>
+      <button class="navbtn" id="navfold" aria-expanded="true" aria-label="收起菜单" title="收起菜单"><svg class="i"><use href="#panel"/></svg></button>
+    </div>
+    <button class="proj" title="切换项目"><i>格</i><span>当前项目<b>示例商店</b></span><svg class="i"><use href="#down"/></svg></button>
+    <div class="menu">
+      <div class="grp">
+        <h6>知识库</h6>
+        <a href="knowledge.html"><svg class="i"><use href="#db"/></svg><span>数据集</span></a>
+        <a href="import.html"><svg class="i"><use href="#upload"/></svg><span>导入和解析</span></a>
+        <a href="chunk-lab.html" class="on" aria-current="page"><svg class="i"><use href="#cut"/></svg><span>切块实验室</span></a>
+        <a href="jobs.html"><svg class="i"><use href="#tasks"/></svg><span>任务</span></a>
+      </div>
+      <div class="grp">
+        <h6>检索与评测</h6>
+        <a href="playground.html"><svg class="i"><use href="#flask"/></svg><span>检索测试台</span></a>
+        <a href="evals.html"><svg class="i"><use href="#chart"/></svg><span>评测</span></a>
+      </div>
+      <div class="grp">
+        <h6>客服运营</h6>
+        <a href="#"><svg class="i"><use href="#chat"/></svg><span>会话记录</span><em>第二步</em></a>
+        <a href="#"><svg class="i"><use href="#headset"/></svg><span>转人工</span><em>第二步</em></a>
+      </div>
+      <div class="grp">
+        <h6>用量与接入</h6>
+        <a href="#"><svg class="i"><use href="#coin"/></svg><span>用量和花费</span><em>第二步</em></a>
+        <a href="#"><svg class="i"><use href="#plug"/></svg><span>接入方</span></a>
+      </div>
+    </div>
+    <div class="dock">
+      <button aria-label="通知" title="通知"><svg class="i"><use href="#bell"/></svg></button>
+      <button class="keep" aria-label="设置" title="设置"><svg class="i"><use href="#gear"/></svg></button>
+      <button aria-label="搜索" title="搜索"><svg class="i"><use href="#find"/></svg></button>
+      <button aria-label="接口密钥" title="接口密钥"><svg class="i"><use href="#lock"/></svg></button>
+    </div>
+    <div class="me-card"><i>管</i><span>管理员</span><small>本地</small></div>
+  </nav>
+  <main class="page">
+    <div class="head">
+      <h1>切块实验室</h1>
+      <button class="pick">数据集 <b>示例商店 · 帮助</b><svg class="i"><use href="#down"/></svg></button>
+      <button class="pick">对比 <b>v3 · 在用</b><svg class="i"><use href="#down"/></svg></button>
+      <span class="sp"></span>
+      <button class="pick" id="resetBtn">恢复在用设置</button>
+      <button class="primary" id="saveBtn">存为索引版本</button>
+    </div>
+    <div class="strip">
+      <div class="mini hero"><span>块数</span><b id="sN"></b></div>
+      <div class="mini"><span>平均长度</span><b id="sAvg"></b></div>
+      <div class="mini"><span>最短</span><b id="sMin"></b></div>
+      <div class="mini"><span>最长</span><b id="sMax"></b></div>
+      <div class="mini"><span>过短</span><b id="sShort"></b></div>
+      <div class="mini"><span>过长</span><b id="sLong"></b></div>
+    </div>
+    <div class="work">
+      <section class="panel params">
+        <h2>切块设置</h2>
+        <div class="fld"><label for="doc">预览文档</label><select id="doc"></select></div>
+        <div class="fld"><span class="l">策略</span>
+          <div class="seg-ctl" id="strategy" role="group" aria-label="切块策略"><button data-s="heading" class="on">按标题</button><button data-s="fixed">定长</button><button data-s="parent">父子</button></div>
+          <small id="hint"></small>
+        </div>
+        <div class="fld"><label for="size">块大小 <b id="vSize"></b></label><input id="size" type="range" min="100" max="800" step="20"></div>
+        <div class="fld"><label for="overlap">重叠 <b id="vOverlap"></b></label><input id="overlap" type="range" min="0" max="150" step="10"><small>相邻块共用的字，下方用黄色标出。</small></div>
+        <label class="check"><input id="prefix" type="checkbox"> 每块带上「文章 › 小节」</label>
+        <label class="check"><input id="table" type="checkbox"> 表格不切开</label>
+      </section>
+      <section class="panel">
+        <div class="ptop"><h2>切块预览</h2><span>颜色交替表示不同的块，鼠标移上去和右边对应</span></div>
+        <div class="preview scroll" id="preview"></div>
+      </section>
+      <section class="panel chunks-panel">
+        <div class="ptop"><h2>块列表</h2><span id="sum"></span></div>
+        <div class="list scroll" id="list"></div>
+      </section>
+    </div>
+    <p class="note">效果图：切块是真的在浏览器里算的，文档是示意内容；长度按字符数算，正式实现时另算 token。</p>
+  </main>
+</div>
+<script>
+  function setNav(folded) {
+    document.querySelector('.app').classList.toggle('navfold', folded);
+    var b = document.getElementById('navfold'), label = folded ? '展开菜单' : '收起菜单';
+    b.setAttribute('aria-expanded', !folded); b.setAttribute('aria-label', label); b.title = label;
+  }
+  document.getElementById('navfold').addEventListener('click', function () { setNav(!document.querySelector('.app').classList.contains('navfold')); });
+  setNav(window.innerWidth < 1240);
+
+
+  var $ = function (id) { return document.getElementById(id); };
+  var DOCS = {
+    '质保和补发规则': '# 质保和补发规则\n\n## 质保从什么时候算\n\n质保期从交付时间开始计算，每个商品的质保天数写在商品页。下单时页面会明确显示质保范围，购买即视为已经了解。不同类型的商品规则不同，以商品页为准。自动发货的商品，交付时间就是卡密发出的时间；人工交付的商品，交付时间是客服点击确认交付的时间。订单页会显示准确的交付时间和质保到期日，可以随时查看。质保期内发生的问题，都可以通过订单发起售后。到期当天提交的申请仍然按质保期内处理。如果同一笔订单买了多件商品，每件商品分别计算质保。补发之后，质保期不会重新开始，仍然按第一次交付的时间计算。\n\n## 各类商品的默认质保\n\n| 商品 | 质保 | 补发次数 |\n|---|---|---|\n| Plus 月卡 | 30 天 | 2 次 |\n| Go 月卡 | 30 天 | 2 次 |\n| 礼品卡 | 未使用可换 | 1 次 |\n\n## 怎么申请\n\n在订单页点「申请售后」，选择质保补发并说明情况，可以附截图。截图里请遮住密码等敏感信息。提交后可以在工单页看到处理进度，客服回复时会发邮件提醒。说明里写清楚遇到的现象、发生的时间和已经尝试过的办法，处理会快一些。如果是兑换时报错，可以把报错文字原样贴上来。同一个问题不用重复提交工单，在原工单里继续回复就可以。工单在客服回复后七天没有新消息会自动关闭，关闭之后仍然可以重新打开。游客下单的，可以用订单号和下单邮箱打开订单，再发起售后。\n\n## 谁来判断\n\n是否符合质保由客服核对后确认。符合的会从库存补发一份新的卡密，原卡密标记为已替换，订单上保留完整的替换记录。超过补发次数的情况转人工判断。客服核对时会看订单记录、交付时间、卡密的查看记录和你提供的截图。需要补充材料时，客服会在工单里说明。库存暂时不足时，工单会保持处理中，到货后优先补发。无法补发的情况，客服会说明原因并给出其他处理方式。AI 助手可以解释这些规则、帮你整理材料，但不能替客服做决定。\n\n## 不在质保内的情况\n\n卡密已被使用且无法证明异常的，或者超过质保期的，通常不在质保范围内。具体情况由客服根据订单记录判断，这里的说明不代表最终结论。',
+    '付款后没收到怎么办': '# 付款后没收到怎么办\n\n## 先看订单状态\n\n在「查订单」里看订单状态。显示已交付时，卡密在订单页；显示待付款时，说明付款还没到账。\n\n## 付款了但显示待付款\n\n先不要重复付款。等几分钟后刷新；仍未变化时，可以发起售后并附上付款截图，客服会核对到账情况。使用 USDT 付款时，链上确认一般需要几分钟。转账金额或网络和收银台不一致时，系统无法自动入账，需要客服人工核对。核对时需要提供订单号、付款时间和付款截图，USDT 付款还需要交易哈希。支付宝和微信付款一般几秒内到账，偶尔会因为通道延迟晚几分钟。订单超时关闭后才到账的款项，系统会重新处理：库存够就照常发货，不够就转给客服核对。多付的金额按店铺的规则处理，具体结果以客服确认为准。\n\n## 邮件没收到\n\n邮件可能进了垃圾箱。卡密始终可以在订单页查看，用下单邮箱在「查订单」里就能找回订单。'
+  };
+  var DEFAULT = { s: 'heading', size: 400, overlap: 40, prefix: true, table: true };
+  var cfg = Object.assign({}, DEFAULT);
+  var HINTS = { heading: '按小标题分段，太长再切。适合帮助文章。', fixed: '不管结构，按字数切。作为对照。', parent: '小块用来检索，命中后把所在小节交给模型。' };
+
+  function sections(md) {
+    var title = '', out = [], cur = null;
+    md.split('\n').forEach(function (l) {
+      var m = l.match(/^(#{1,3}) (.+)/);
+      if (m) { if (m[1] === '#') { title = m[2]; return; } cur = { h: m[2], t: '' }; out.push(cur); return; }
+      if (cur) cur.t += l + '\n';
+    });
+    out.forEach(function (x) { x.t = x.t.trim(); });
+    return { title: title, secs: out };
+  }
+  function atoms(t, keepTable) {
+    var res = [], tbl = '';
+    t.split('\n').forEach(function (l) {
+      if (/^\|/.test(l)) { if (keepTable) tbl += l + '\n'; else res.push(l + '\n'); return; }
+      if (tbl) { res.push(tbl); tbl = ''; }
+      (l.match(/[^。！？]+[。！？]?/g) || []).forEach(function (x) { res.push(x); });
+    });
+    if (tbl) res.push(tbl);
+    return res;
+  }
+  function pack(parts, size, overlap) {
+    var out = [], buf = '', ov = 0;
+    parts.forEach(function (p) {
+      if (buf && buf.length + p.length > size) {
+        out.push({ text: buf, ov: ov });
+        var tail = overlap ? buf.slice(-overlap) : '';
+        buf = tail; ov = tail.length;
+      }
+      buf += p;
+    });
+    if (buf.length > ov) out.push({ text: buf, ov: ov });
+    return out;
+  }
+  function chunk(md, c) {
+    var d = sections(md), res = [];
+    if (c.s === 'fixed') {
+      var all = d.secs.map(function (x) { return x.h + '\n' + x.t; }).join('\n'), step = Math.max(20, c.size - c.overlap);
+      for (var i = 0; i < all.length; i += step) {
+        res.push({ text: all.slice(i, i + c.size), ov: i ? Math.min(c.overlap, all.length - i) : 0, path: '第 ' + (res.length + 1) + ' 段' });
+        if (i + c.size >= all.length) break;
+      }
+    } else {
+      var size = c.s === 'parent' ? Math.round(c.size / 2) : c.size;
+      d.secs.forEach(function (x) {
+        pack(atoms(x.t, c.table), size, c.overlap).forEach(function (b) { res.push({ text: b.text, ov: b.ov, path: x.h, parent: c.s === 'parent' ? x.t.length : 0 }); });
+      });
+    }
+    res.forEach(function (r) { r.pre = c.prefix && c.s !== 'fixed' ? d.title + ' › ' + r.path + '\n' : ''; r.len = r.pre.length + r.text.length; });
+    return res;
+  }
+  function stats(list, c) {
+    var L = list.map(function (x) { return x.len; });
+    return { n: L.length, avg: Math.round(L.reduce(function (a, b) { return a + b; }, 0) / (L.length || 1)), min: Math.min.apply(null, L), max: Math.max.apply(null, L), short: L.filter(function (v) { return v < 60; }).length, long: L.filter(function (v) { return v > (c.s === 'parent' ? c.size / 2 : c.size) * 1.1; }).length };
+  }
+  function esc(s) { var d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+  function delta(a, b, lowerGood) {
+    var n = a - b; if (!n) return '<em class="eq">持平</em>';
+    var good = lowerGood ? n < 0 : null;
+    return '<em class="' + (good === null ? 'eq' : good ? 'up' : 'dn') + '">' + (n > 0 ? '+' : '') + n + '</em>';
+  }
+  function render() {
+    var md = DOCS[$('doc').value], list = chunk(md, cfg), s = stats(list, cfg), base = stats(chunk(md, DEFAULT), DEFAULT);
+    $('sN').innerHTML = s.n + '<small>块</small>' + delta(s.n, base.n);
+    $('sAvg').innerHTML = s.avg + '<small>字</small>' + delta(s.avg, base.avg);
+    $('sMin').innerHTML = s.min + '<small>字</small>';
+    $('sMax').innerHTML = s.max + '<small>字</small>';
+    $('sShort').innerHTML = s.short + '<small>块</small>' + delta(s.short, base.short, true);
+    $('sLong').innerHTML = s.long + '<small>块</small>' + delta(s.long, base.long, true);
+    $('vSize').textContent = cfg.size + ' 字' + (cfg.s === 'parent' ? '（子块 ' + Math.round(cfg.size / 2) + '）' : '');
+    $('vOverlap').textContent = cfg.overlap + ' 字';
+    $('hint').textContent = HINTS[cfg.s];
+    $('sum').textContent = '共 ' + s.n + ' 块';
+    $('preview').innerHTML = list.map(function (b, i) {
+      return '<span class="blk" data-i="' + i + '">' + (b.pre ? '<i>' + esc(b.pre) + '</i>' : '') + (b.ov ? '<mark>' + esc(b.text.slice(0, b.ov)) + '</mark>' : '') + esc(b.text.slice(b.ov)) + '</span>';
+    }).join('');
+    var limit = cfg.s === 'parent' ? cfg.size / 2 : cfg.size, top = Math.max(limit * 1.1, s.max);
+    $('list').innerHTML = list.map(function (b, i) {
+      var bad = b.len < 60 || b.len > limit * 1.1;
+      return '<button class="ck" data-i="' + i + '"><span class="r"><span class="no">' + (i + 1) + '</span><span class="p">' + esc(b.path) + '</span><span class="len' + (bad ? ' warn' : '') + '">' + b.len + ' 字</span></span><span class="barx"><i class="' + (bad ? 'warn' : '') + '" style="width:' + Math.round(b.len / top * 100) + '%"></i></span></button>';
+    }).join('');
+  }
+  function sync() {
+    $('size').value = cfg.size; $('overlap').value = cfg.overlap; $('prefix').checked = cfg.prefix; $('table').checked = cfg.table;
+    document.querySelectorAll('#strategy button').forEach(function (b) { b.classList.toggle('on', b.dataset.s === cfg.s); });
+    $('prefix').disabled = cfg.s === 'fixed'; $('table').disabled = cfg.s === 'fixed';
+    render();
+  }
+  function mark(i) { document.querySelectorAll('.blk, .ck').forEach(function (e) { e.classList.toggle('hl', e.dataset.i === i); }); }
+  ['preview', 'list'].forEach(function (id) {
+    $(id).addEventListener('mouseover', function (e) { var t = e.target.closest('[data-i]'); mark(t ? t.dataset.i : null); });
+    $(id).addEventListener('mouseleave', function () { mark(null); });
+  });
+  $('list').addEventListener('click', function (e) {
+    var c = e.target.closest('.ck'); if (!c) return;
+    var b = $('preview').querySelector('[data-i="' + c.dataset.i + '"]'); if (b) b.scrollIntoView({ block: 'nearest' });
+  });
+  $('doc').innerHTML = Object.keys(DOCS).map(function (k) { return '<option>' + k + '</option>'; }).join('');
+  $('doc').addEventListener('change', render);
+  $('strategy').addEventListener('click', function (e) { var b = e.target.closest('button'); if (b) { cfg.s = b.dataset.s; sync(); } });
+  $('size').addEventListener('input', function () { cfg.size = +this.value; if (cfg.overlap >= cfg.size / 2) cfg.overlap = Math.floor(cfg.size / 20) * 10 - 10; sync(); });
+  $('overlap').addEventListener('input', function () { cfg.overlap = Math.min(+this.value, Math.floor(cfg.size / 20) * 10 - 10); sync(); });
+  $('prefix').addEventListener('change', function () { cfg.prefix = this.checked; render(); });
+  $('table').addEventListener('change', function () { cfg.table = this.checked; render(); });
+  $('resetBtn').addEventListener('click', function () { cfg = Object.assign({}, DEFAULT); sync(); });
+  $('saveBtn').addEventListener('click', function () {
+    var b = this; b.textContent = '已存为 v4，去任务页建索引'; b.disabled = true;
+    setTimeout(function () { b.textContent = '存为索引版本'; b.disabled = false; }, 1600);
+  });
+  sync();
+
+</script>
+</body>
+</html>

@@ -1,0 +1,5426 @@
+{
+ "openapi": "3.1.0",
+ "info": {
+  "title": "customer-agent 管理后台",
+  "version": "0.1.0"
+ },
+ "paths": {
+  "/api/login": {
+   "post": {
+    "summary": "Login",
+    "operationId": "login_api_login_post",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/LoginIn"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/MeOut"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/logout": {
+   "post": {
+    "summary": "Logout",
+    "operationId": "logout_api_logout_post",
+    "responses": {
+     "204": {
+      "description": "Successful Response"
+     }
+    }
+   }
+  },
+  "/api/me": {
+   "get": {
+    "summary": "Me",
+    "operationId": "me_api_me_get",
+    "parameters": [
+     {
+      "name": "admin_session",
+      "in": "cookie",
+      "required": false,
+      "schema": {
+       "type": "string",
+       "default": "",
+       "title": "Admin Session"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/MeOut"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/status": {
+   "get": {
+    "summary": "Status",
+    "description": "接入方在给聊天窗配置时问一下：总开关开着、今天的用量没到上限，再带上聊天窗要显示的设置。",
+    "operationId": "status_v1_status_get",
+    "parameters": [
+     {
+      "name": "x-api-key",
+      "in": "header",
+      "required": false,
+      "schema": {
+       "type": "string",
+       "default": "",
+       "title": "X-Api-Key"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/StatusOut"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/conversations": {
+   "post": {
+    "summary": "Create",
+    "operationId": "create_v1_conversations_post",
+    "parameters": [
+     {
+      "name": "x-api-key",
+      "in": "header",
+      "required": false,
+      "schema": {
+       "type": "string",
+       "default": "",
+       "title": "X-Api-Key"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/ConversationIn"
+       }
+      }
+     }
+    },
+    "responses": {
+     "201": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ConversationOut"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/conversations/{conversation_id}": {
+   "get": {
+    "summary": "History",
+    "description": "取历史。聊天窗在转人工期间每隔几秒带上 after（已有的最后一条消息编号）来拉客服的新回复（docs/07 §3）。",
+    "operationId": "history_v1_conversations__conversation_id__get",
+    "parameters": [
+     {
+      "name": "conversation_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "title": "Conversation Id"
+      }
+     },
+     {
+      "name": "after",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "type": "integer",
+       "default": 0,
+       "title": "After"
+      }
+     },
+     {
+      "name": "x-api-key",
+      "in": "header",
+      "required": false,
+      "schema": {
+       "type": "string",
+       "default": "",
+       "title": "X-Api-Key"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HistoryOut"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/conversations/{conversation_id}/messages": {
+   "post": {
+    "summary": "Send",
+    "description": "发一条消息，回答按 SSE 流回：user（买家的话，已打码）、status（在调哪个工具）、text（文字）、clear（撤掉已流出的文字）、handoff（转人工）、done（结束）、error。\n客服接手时不调模型，只回 user 和 done（done 里 staff 为真），买家的话留给客服看，也不算 AI 的限额。",
+    "operationId": "send_v1_conversations__conversation_id__messages_post",
+    "parameters": [
+     {
+      "name": "conversation_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "title": "Conversation Id"
+      }
+     },
+     {
+      "name": "x-api-key",
+      "in": "header",
+      "required": false,
+      "schema": {
+       "type": "string",
+       "default": "",
+       "title": "X-Api-Key"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/SendIn"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/conversations/{conversation_id}/images": {
+   "post": {
+    "summary": "Send Image",
+    "description": "买家发一张图（docs/09）。清洗后存下来，挂在一条文字是「[图片]」的消息上；之后和发文字一样，AI 回一句或交给客服。\nuser 事件里多一个 image：{id, width, height}。",
+    "operationId": "send_image_v1_conversations__conversation_id__images_post",
+    "parameters": [
+     {
+      "name": "conversation_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "title": "Conversation Id"
+      }
+     },
+     {
+      "name": "x-api-key",
+      "in": "header",
+      "required": false,
+      "schema": {
+       "type": "string",
+       "default": "",
+       "title": "X-Api-Key"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "multipart/form-data": {
+       "schema": {
+        "$ref": "#/components/schemas/Body_send_image_v1_conversations__conversation_id__images_post"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/conversations/{conversation_id}/images/{image_id}": {
+   "get": {
+    "summary": "Read Image",
+    "description": "买家经接入方看自己会话里的图。",
+    "operationId": "read_image_v1_conversations__conversation_id__images__image_id__get",
+    "parameters": [
+     {
+      "name": "conversation_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "title": "Conversation Id"
+      }
+     },
+     {
+      "name": "image_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "integer",
+       "title": "Image Id"
+      }
+     },
+     {
+      "name": "x-api-key",
+      "in": "header",
+      "required": false,
+      "schema": {
+       "type": "string",
+       "default": "",
+       "title": "X-Api-Key"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/conversations/{conversation_id}/handoff": {
+   "post": {
+    "summary": "Request Handoff",
+    "description": "买家点了「转人工」。摘要取最近的对话；已经转过的直接返回原来的结果。",
+    "operationId": "request_handoff_v1_conversations__conversation_id__handoff_post",
+    "parameters": [
+     {
+      "name": "conversation_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "title": "Conversation Id"
+      }
+     },
+     {
+      "name": "x-api-key",
+      "in": "header",
+      "required": false,
+      "schema": {
+       "type": "string",
+       "default": "",
+       "title": "X-Api-Key"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/HandoffIn"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HandoffResult"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/conversations/{conversation_id}/messages/{message_id}/feedback": {
+   "post": {
+    "summary": "Feedback",
+    "operationId": "feedback_v1_conversations__conversation_id__messages__message_id__feedback_post",
+    "parameters": [
+     {
+      "name": "conversation_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "title": "Conversation Id"
+      }
+     },
+     {
+      "name": "message_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "integer",
+       "title": "Message Id"
+      }
+     },
+     {
+      "name": "x-api-key",
+      "in": "header",
+      "required": false,
+      "schema": {
+       "type": "string",
+       "default": "",
+       "title": "X-Api-Key"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/FeedbackIn"
+       }
+      }
+     }
+    },
+    "responses": {
+     "204": {
+      "description": "Successful Response"
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/knowledge-bases/{kb_id}/example-questions": {
+   "get": {
+    "summary": "Example Questions",
+    "description": "测试台初始状态给的示例问题，没有题集时为空。",
+    "operationId": "example_questions_api_knowledge_bases__kb_id__example_questions_get",
+    "parameters": [
+     {
+      "name": "kb_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "integer",
+       "title": "Kb Id"
+      }
+     },
+     {
+      "name": "admin_session",
+      "in": "cookie",
+      "required": false,
+      "schema": {
+       "type": "string",
+       "default": "",
+       "title": "Admin Session"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "type": "array",
+         "items": {
+          "type": "string"
+         },
+         "title": "Response Example Questions Api Knowledge Bases  Kb Id  Example Questions Get"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/knowledge-bases": {
+   "get": {
+    "summary": "Knowledge Bases",
+    "operationId": "knowledge_bases_api_knowledge_bases_get",
+    "parameters": [
+     {
+      "name": "admin_session",
+      "in": "cookie",
+      "required": false,
+      "schema": {
+       "type": "string",
+       "default": "",
+       "title": "Admin Session"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "type": "array",
+         "items": {
+          "$ref": "#/components/schemas/KnowledgeBaseOut"
+         },
+         "title": "Response Knowledge Bases Api Knowledge Bases Get"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/indexes/{index_id}/dataset": {
+   "get": {
+    "summary": "Dataset",
+    "operationId": "dataset_api_indexes__index_id__dataset_get",
+    "parameters": [
+     {
+      "name": "index_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "integer",
+       "title": "Index Id"
+      }
+     },
+     {
+      "name": "admin_session",
+      "in": "cookie",
+      "required": false,
+      "schema": {
+       "type": "string",
+       "default": "",
+       "title": "Admin Session"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/DatasetOut"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/indexes/{index_id}/documents/{document_id}": {
+   "get": {
+    "summary": "Document",
+    "operationId": "document_api_indexes__index_id__documents__document_id__get",
+    "parameters": [
+     {
+      "name": "index_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "integer",
+       "title": "Index Id"
+      }
+     },
+     {
+      "name": "document_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "integer",
+       "title": "Document Id"
+      }
+     },
+     {
+      "name": "admin_session",
+      "in": "cookie",
+      "required": false,
+      "schema": {
+       "type": "string",
+       "default": "",
+       "title": "Admin Session"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/DocumentDetail"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/indexes/{index_id}/sync": {
+   "post": {
+    "summary": "Sync Index",
+    "description": "重新读资料来源，只重算变了的文档。",
+    "operationId": "sync_index_api_indexes__index_id__sync_post",
+    "parameters": [
+     {
+      "name": "index_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "integer",
+       "title": "Index Id"
+      }
+     },
+     {
+      "name": "admin_session",
+      "in": "cookie",
+      "required": false,
+      "schema": {
+       "type": "string",
+       "default": "",
+       "title": "Admin Session"
+      }
+     }
+    ],
+    "responses": {
+     "202": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/indexes/{index_id}/rebuild": {
+   "post": {
+    "summary": "Rebuild Index",
+    "description": "清掉这个索引的块，全部重切重算。",
+    "operationId": "rebuild_index_api_indexes__index_id__rebuild_post",
+    "parameters": [
+     {
+      "name": "index_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "integer",
+       "title": "Index Id"
+      }
+     },
+     {
+      "name": "admin_session",
+      "in": "cookie",
+      "required": false,
+      "schema": {
+       "type": "string",
+       "default": "",
+       "title": "Admin Session"
+      }
+     }
+    ],
+    "responses": {
+     "202": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/knowledge-bases/{kb_id}/imports": {
+   "get": {
+    "summary": "List Files",
+    "operationId": "list_files_api_knowledge_bases__kb_id__imports_get",
+    "parameters": [
+     {
+      "name": "kb_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "integer",
+       "title": "Kb Id"
+      }
+     },
+     {
+      "name": "admin_session",
+      "in": "cookie",
+      "required": false,
+      "schema": {
+       "type": "string",
+       "default": "",
+       "title": "Admin Session"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "type": "array",
+         "items": {
+          "$ref": "#/components/schemas/FileRow"
+         },
+         "title": "Response List Files Api Knowledge Bases  Kb Id  Imports Get"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   },
+   "post": {
+    "summary": "Upload",
+    "operationId": "upload_api_knowledge_bases__kb_id__imports_post",
+    "parameters": [
+     {
+      "name": "kb_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "integer",
+       "title": "Kb Id"
+      }
+     },
+     {
+      "name": "admin_session",
+      "in": "cookie",
+      "required": false,
+      "schema": {
+       "type": "string",
+       "default": "",
+       "title": "Admin Session"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "multipart/form-data": {
+       "schema": {
+        "$ref": "#/components/schemas/Body_upload_api_knowledge_bases__kb_id__imports_post"
+       }
+      }
+     }
+    },
+    "responses": {
+     "202": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/FileRow"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/imports/{file_id}": {
+   "get": {
+    "summary": "Detail",
+    "operationId": "detail_api_imports__file_id__get",
+    "parameters": [
+     {
+      "name": "file_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "integer",
+       "title": "File Id"
+      }
+     },
+     {
+      "name": "admin_session",
+      "in": "cookie",
+      "required": false,
+      "schema": {
+       "type": "string",
+       "default": "",
+       "title": "Admin Session"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/FileDetail"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   },
+   "patch": {
+    "summary": "Edit",
+    "operationId": "edit_api_imports__file_id__patch",
+    "parameters": [
+     {
+      "name": "file_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "integer",
+       "title": "File Id"
+      }
+     },
+     {
+      "name": "admin_session",
+      "in": "cookie",
+      "required": false,
+      "schema": {
+       "type": "string",
+       "default": "",
+       "title": "Admin Session"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/EditIn"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/FileDetail"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   },
+   "delete": {
+    "summary": "Remove",
+    "description": "移除还没确认的文件。已经进知识库的不从这里删。",
+    "operationId": "remove_api_imports__file_id__delete",
+    "parameters": [
+     {
+      "name": "file_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "integer",
+       "title": "File Id"
+      }
+     },
+     {
+      "name": "admin_session",
+      "in": "cookie",
+      "required": false,
+      "schema": {
+       "type": "string",
+       "default": "",
+       "title": "Admin Session"
+      }
+     }
+    ],
+    "responses": {
+     "204": {
+      "description": "Successful Response"
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/imports/{file_id}/original": {
+   "get": {
+    "summary": "Original",
+    "description": "看原文件。文本类一律按纯文本给（HTML 也是，里面的脚本不会运行），PDF 内嵌显示，Word 下载。",
+    "operationId": "original_api_imports__file_id__original_get",
+    "parameters": [
+     {
+      "name": "file_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "integer",
+       "title": "File Id"
+      }
+     },
+     {
+      "name": "admin_session",
+      "in": "cookie",
+      "required": false,
+      "schema": {
+       "type": "string",
+       "default": "",
+       "title": "Admin Session"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/imports/{file_id}/reparse": {
+   "post": {
+    "summary": "Reparse",
+    "description": "重新解析，手动改过的内容会被覆盖。",
+    "operationId": "reparse_api_imports__file_id__reparse_post",
+    "parameters": [
+     {
+      "name": "file_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "integer",
+       "title": "File Id"
+      }
+     },
+     {
+      "name": "admin_session",
+      "in": "cookie",
+      "required": false,
+      "schema": {
+       "type": "string",
+       "default": "",
+       "title": "Admin Session"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/ReparseIn"
+       }
+      }
+     }
+    },
+    "responses": {
+     "202": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/knowledge-bases/{kb_id}/imports/confirm": {
+   "post": {
+    "summary": "Confirm",
+    "description": "把看过的文件写进知识库，并开始切块、算向量。",
+    "operationId": "confirm_api_knowledge_bases__kb_id__imports_confirm_post",
+    "parameters": [
+     {
+      "name": "kb_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "integer",
+       "title": "Kb Id"
+      }
+     },
+     {
+      "name": "admin_session",
+      "in": "cookie",
+      "required": false,
+      "schema": {
+       "type": "string",
+       "default": "",
+       "title": "Admin Session"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/ConfirmIn"
+       }
+      }
+     }
+    },
+    "responses": {
+     "202": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/chunk-lab/preview": {
+   "post": {
+    "summary": "Preview",
+    "operationId": "preview_api_chunk_lab_preview_post",
+    "parameters": [
+     {
+      "name": "admin_session",
+      "in": "cookie",
+      "required": false,
+      "schema": {
+       "type": "string",
+       "default": "",
+       "title": "Admin Session"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/PreviewIn"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/PreviewOut"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/chunk-lab/indexes": {
+   "post": {
+    "summary": "Save",
+    "description": "存成新的索引版本并开始建索引。在用的版本不受影响。",
+    "operationId": "save_api_chunk_lab_indexes_post",
+    "parameters": [
+     {
+      "name": "admin_session",
+      "in": "cookie",
+      "required": false,
+      "schema": {
+       "type": "string",
+       "default": "",
+       "title": "Admin Session"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/SaveIn"
+       }
+      }
+     }
+    },
+    "responses": {
+     "202": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/SaveOut"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/playground": {
+   "post": {
+    "summary": "Playground",
+    "description": "跑一次检索（和可选的回答），返回每一步的结果。",
+    "operationId": "playground_api_playground_post",
+    "parameters": [
+     {
+      "name": "admin_session",
+      "in": "cookie",
+      "required": false,
+      "schema": {
+       "type": "string",
+       "default": "",
+       "title": "Admin Session"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/PlaygroundIn"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/PlaygroundOut"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/evals/runs": {
+   "get": {
+    "summary": "Runs",
+    "description": "这个知识库的评测记录，新的在前。",
+    "operationId": "runs_api_evals_runs_get",
+    "parameters": [
+     {
+      "name": "kb_id",
+      "in": "query",
+      "required": true,
+      "schema": {
+       "type": "integer",
+       "title": "Kb Id"
+      }
+     },
+     {
+      "name": "admin_session",
+      "in": "cookie",
+      "required": false,
+      "schema": {
+       "type": "string",
+       "default": "",
+       "title": "Admin Session"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "type": "array",
+         "items": {
+          "$ref": "#/components/schemas/RunOut"
+         },
+         "title": "Response Runs Api Evals Runs Get"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   },
+   "post": {
+    "summary": "Create Run",
+    "operationId": "create_run_api_evals_runs_post",
+    "parameters": [
+     {
+      "name": "admin_session",
+      "in": "cookie",
+      "required": false,
+      "schema": {
+       "type": "string",
+       "default": "",
+       "title": "Admin Session"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/RunIn"
+       }
+      }
+     }
+    },
+    "responses": {
+     "202": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/RunOut"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/evals/compare": {
+   "get": {
+    "summary": "Compare",
+    "description": "逐题对比两次评测。两次必须用的是同一个题集。",
+    "operationId": "compare_api_evals_compare_get",
+    "parameters": [
+     {
+      "name": "base",
+      "in": "query",
+      "required": true,
+      "schema": {
+       "type": "integer",
+       "title": "Base"
+      }
+     },
+     {
+      "name": "target",
+      "in": "query",
+      "required": true,
+      "schema": {
+       "type": "integer",
+       "title": "Target"
+      }
+     },
+     {
+      "name": "admin_session",
+      "in": "cookie",
+      "required": false,
+      "schema": {
+       "type": "string",
+       "default": "",
+       "title": "Admin Session"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "type": "array",
+         "items": {
+          "$ref": "#/components/schemas/CompareRow"
+         },
+         "title": "Response Compare Api Evals Compare Get"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/tasks": {
+   "get": {
+    "summary": "Tasks",
+    "description": "最近的任务，新的在前。",
+    "operationId": "tasks_api_tasks_get",
+    "parameters": [
+     {
+      "name": "admin_session",
+      "in": "cookie",
+      "required": false,
+      "schema": {
+       "type": "string",
+       "default": "",
+       "title": "Admin Session"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/TasksOut"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/tasks/cancel": {
+   "post": {
+    "summary": "Cancel",
+    "description": "让进行中的任务做完手头这一篇或这一题就停。",
+    "operationId": "cancel_api_tasks_cancel_post",
+    "parameters": [
+     {
+      "name": "admin_session",
+      "in": "cookie",
+      "required": false,
+      "schema": {
+       "type": "string",
+       "default": "",
+       "title": "Admin Session"
+      }
+     }
+    ],
+    "responses": {
+     "202": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/tasks/index/{job_id}/retry": {
+   "post": {
+    "summary": "Retry Index",
+    "description": "接着做：做完的文档不重算。同步失败的会重新读一遍资料。",
+    "operationId": "retry_index_api_tasks_index__job_id__retry_post",
+    "parameters": [
+     {
+      "name": "job_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "integer",
+       "title": "Job Id"
+      }
+     },
+     {
+      "name": "admin_session",
+      "in": "cookie",
+      "required": false,
+      "schema": {
+       "type": "string",
+       "default": "",
+       "title": "Admin Session"
+      }
+     }
+    ],
+    "responses": {
+     "202": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/tasks/eval/{run_id}/retry": {
+   "post": {
+    "summary": "Retry Eval",
+    "description": "按同样的配方新跑一次评测。",
+    "operationId": "retry_eval_api_tasks_eval__run_id__retry_post",
+    "parameters": [
+     {
+      "name": "run_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "integer",
+       "title": "Run Id"
+      }
+     },
+     {
+      "name": "admin_session",
+      "in": "cookie",
+      "required": false,
+      "schema": {
+       "type": "string",
+       "default": "",
+       "title": "Admin Session"
+      }
+     }
+    ],
+    "responses": {
+     "202": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/service-settings": {
+   "get": {
+    "summary": "Read",
+    "operationId": "read_api_service_settings_get",
+    "parameters": [
+     {
+      "name": "admin_session",
+      "in": "cookie",
+      "required": false,
+      "schema": {
+       "type": "string",
+       "default": "",
+       "title": "Admin Session"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ServiceStateOut"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   },
+   "put": {
+    "summary": "Write",
+    "operationId": "write_api_service_settings_put",
+    "parameters": [
+     {
+      "name": "admin_session",
+      "in": "cookie",
+      "required": false,
+      "schema": {
+       "type": "string",
+       "default": "",
+       "title": "Admin Session"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/ServiceSettingsIO"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ServiceStateOut"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/chats": {
+   "get": {
+    "summary": "List Chats",
+    "operationId": "list_chats_api_chats_get",
+    "parameters": [
+     {
+      "name": "days",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "type": "integer",
+       "maximum": 90,
+       "minimum": 1,
+       "default": 7,
+       "title": "Days"
+      }
+     },
+     {
+      "name": "show",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "enum": [
+        "all",
+        "handoff",
+        "down",
+        "wrong"
+       ],
+       "type": "string",
+       "default": "all",
+       "title": "Show"
+      }
+     },
+     {
+      "name": "q",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "type": "string",
+       "maxLength": 100,
+       "default": "",
+       "title": "Q"
+      }
+     },
+     {
+      "name": "admin_session",
+      "in": "cookie",
+      "required": false,
+      "schema": {
+       "type": "string",
+       "default": "",
+       "title": "Admin Session"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ChatList"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/chats/{conversation_id}": {
+   "get": {
+    "summary": "Read Chat",
+    "operationId": "read_chat_api_chats__conversation_id__get",
+    "parameters": [
+     {
+      "name": "conversation_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "title": "Conversation Id"
+      }
+     },
+     {
+      "name": "admin_session",
+      "in": "cookie",
+      "required": false,
+      "schema": {
+       "type": "string",
+       "default": "",
+       "title": "Admin Session"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ChatDetail"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/chats/images/{image_id}": {
+   "get": {
+    "summary": "Read Image",
+    "description": "后台看买家发的图。",
+    "operationId": "read_image_api_chats_images__image_id__get",
+    "parameters": [
+     {
+      "name": "image_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "integer",
+       "title": "Image Id"
+      }
+     },
+     {
+      "name": "admin_session",
+      "in": "cookie",
+      "required": false,
+      "schema": {
+       "type": "string",
+       "default": "",
+       "title": "Admin Session"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/chats/{conversation_id}/reply": {
+   "post": {
+    "summary": "Reply",
+    "description": "客服直接回复买家。第一句发出后会话由客服接手，AI 不再回答。",
+    "operationId": "reply_api_chats__conversation_id__reply_post",
+    "parameters": [
+     {
+      "name": "conversation_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "title": "Conversation Id"
+      }
+     },
+     {
+      "name": "admin_session",
+      "in": "cookie",
+      "required": false,
+      "schema": {
+       "type": "string",
+       "default": "",
+       "title": "Admin Session"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/ReplyIn"
+       }
+      }
+     }
+    },
+    "responses": {
+     "204": {
+      "description": "Successful Response"
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/chats/{conversation_id}/release": {
+   "post": {
+    "summary": "Release",
+    "description": "交还给 AI。",
+    "operationId": "release_api_chats__conversation_id__release_post",
+    "parameters": [
+     {
+      "name": "conversation_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "title": "Conversation Id"
+      }
+     },
+     {
+      "name": "admin_session",
+      "in": "cookie",
+      "required": false,
+      "schema": {
+       "type": "string",
+       "default": "",
+       "title": "Admin Session"
+      }
+     }
+    ],
+    "responses": {
+     "204": {
+      "description": "Successful Response"
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/chats/{conversation_id}/draft": {
+   "post": {
+    "summary": "Draft",
+    "description": "AI 起草一条回复，客服改完再发。不存库；算进当天用量，到了上限也能用。",
+    "operationId": "draft_api_chats__conversation_id__draft_post",
+    "parameters": [
+     {
+      "name": "conversation_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "title": "Conversation Id"
+      }
+     },
+     {
+      "name": "admin_session",
+      "in": "cookie",
+      "required": false,
+      "schema": {
+       "type": "string",
+       "default": "",
+       "title": "Admin Session"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/DraftOut"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/chats/{conversation_id}/messages/{message_id}/wrong": {
+   "put": {
+    "summary": "Mark Wrong",
+    "operationId": "mark_wrong_api_chats__conversation_id__messages__message_id__wrong_put",
+    "parameters": [
+     {
+      "name": "conversation_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "title": "Conversation Id"
+      }
+     },
+     {
+      "name": "message_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "integer",
+       "title": "Message Id"
+      }
+     },
+     {
+      "name": "admin_session",
+      "in": "cookie",
+      "required": false,
+      "schema": {
+       "type": "string",
+       "default": "",
+       "title": "Admin Session"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/WrongIn"
+       }
+      }
+     }
+    },
+    "responses": {
+     "204": {
+      "description": "Successful Response"
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/chats/export/wrong.jsonl": {
+   "get": {
+    "summary": "Export Wrong",
+    "description": "标了答错的回答，连同买家问的那句，按评测题的格式导出（evals/<知识库>/questions.jsonl）。标准答案和该命中的资料要人补上。",
+    "operationId": "export_wrong_api_chats_export_wrong_jsonl_get",
+    "parameters": [
+     {
+      "name": "days",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "type": "integer",
+       "maximum": 90,
+       "minimum": 1,
+       "default": 90,
+       "title": "Days"
+      }
+     },
+     {
+      "name": "admin_session",
+      "in": "cookie",
+      "required": false,
+      "schema": {
+       "type": "string",
+       "default": "",
+       "title": "Admin Session"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response"
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/handoffs/counts": {
+   "get": {
+    "summary": "Counts",
+    "description": "每个状态各有几条，加上 replies：客服接手中、买家说了话还没回的会话。左侧菜单的「转人工」后面显示待处理、没通知到和 replies 的条数。",
+    "operationId": "counts_api_handoffs_counts_get",
+    "parameters": [
+     {
+      "name": "admin_session",
+      "in": "cookie",
+      "required": false,
+      "schema": {
+       "type": "string",
+       "default": "",
+       "title": "Admin Session"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "type": "object",
+         "additionalProperties": {
+          "type": "integer"
+         },
+         "title": "Response Counts Api Handoffs Counts Get"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/handoffs": {
+   "get": {
+    "summary": "List Handoffs",
+    "operationId": "list_handoffs_api_handoffs_get",
+    "parameters": [
+     {
+      "name": "status",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "enum": [
+        "open",
+        "unnotified",
+        "done"
+       ],
+       "type": "string",
+       "default": "open",
+       "title": "Status"
+      }
+     },
+     {
+      "name": "admin_session",
+      "in": "cookie",
+      "required": false,
+      "schema": {
+       "type": "string",
+       "default": "",
+       "title": "Admin Session"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HandoffList"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/handoffs/{handoff_id}/done": {
+   "post": {
+    "summary": "Mark Done",
+    "operationId": "mark_done_api_handoffs__handoff_id__done_post",
+    "parameters": [
+     {
+      "name": "handoff_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "integer",
+       "title": "Handoff Id"
+      }
+     },
+     {
+      "name": "admin_session",
+      "in": "cookie",
+      "required": false,
+      "schema": {
+       "type": "string",
+       "default": "",
+       "title": "Admin Session"
+      }
+     }
+    ],
+    "responses": {
+     "204": {
+      "description": "Successful Response"
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/handoffs/{handoff_id}/notify": {
+   "post": {
+    "summary": "Notify Again",
+    "description": "再通知一次店铺。成功后回到待处理。",
+    "operationId": "notify_again_api_handoffs__handoff_id__notify_post",
+    "parameters": [
+     {
+      "name": "handoff_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "integer",
+       "title": "Handoff Id"
+      }
+     },
+     {
+      "name": "admin_session",
+      "in": "cookie",
+      "required": false,
+      "schema": {
+       "type": "string",
+       "default": "",
+       "title": "Admin Session"
+      }
+     }
+    ],
+    "responses": {
+     "204": {
+      "description": "Successful Response"
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/usage": {
+   "get": {
+    "summary": "Read Usage",
+    "operationId": "read_usage_api_usage_get",
+    "parameters": [
+     {
+      "name": "days",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "type": "integer",
+       "maximum": 90,
+       "minimum": 1,
+       "default": 14,
+       "title": "Days"
+      }
+     },
+     {
+      "name": "admin_session",
+      "in": "cookie",
+      "required": false,
+      "schema": {
+       "type": "string",
+       "default": "",
+       "title": "Admin Session"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/UsageOut"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/shop": {
+   "get": {
+    "summary": "Read Shop",
+    "operationId": "read_shop_api_shop_get",
+    "parameters": [
+     {
+      "name": "admin_session",
+      "in": "cookie",
+      "required": false,
+      "schema": {
+       "type": "string",
+       "default": "",
+       "title": "Admin Session"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ShopOut"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/system": {
+   "get": {
+    "summary": "Read System",
+    "operationId": "read_system_api_system_get",
+    "parameters": [
+     {
+      "name": "admin_session",
+      "in": "cookie",
+      "required": false,
+      "schema": {
+       "type": "string",
+       "default": "",
+       "title": "Admin Session"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/SystemOut"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/widget-settings": {
+   "get": {
+    "summary": "Read",
+    "operationId": "read_api_widget_settings_get",
+    "parameters": [
+     {
+      "name": "admin_session",
+      "in": "cookie",
+      "required": false,
+      "schema": {
+       "type": "string",
+       "default": "",
+       "title": "Admin Session"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/WidgetSettings"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   },
+   "put": {
+    "summary": "Write",
+    "operationId": "write_api_widget_settings_put",
+    "parameters": [
+     {
+      "name": "admin_session",
+      "in": "cookie",
+      "required": false,
+      "schema": {
+       "type": "string",
+       "default": "",
+       "title": "Admin Session"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/WidgetSettings"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/WidgetSettings"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  }
+ },
+ "components": {
+  "schemas": {
+   "AnswerOut": {
+    "properties": {
+     "text": {
+      "type": "string",
+      "title": "Text"
+     },
+     "ms": {
+      "type": "integer",
+      "title": "Ms"
+     },
+     "input_tokens": {
+      "type": "integer",
+      "title": "Input Tokens"
+     },
+     "output_tokens": {
+      "type": "integer",
+      "title": "Output Tokens"
+     }
+    },
+    "type": "object",
+    "required": [
+     "text",
+     "ms",
+     "input_tokens",
+     "output_tokens"
+    ],
+    "title": "AnswerOut"
+   },
+   "Body_send_image_v1_conversations__conversation_id__images_post": {
+    "properties": {
+     "file": {
+      "type": "string",
+      "contentMediaType": "application/octet-stream",
+      "title": "File"
+     },
+     "visitor_token": {
+      "anyOf": [
+       {
+        "type": "string",
+        "maxLength": 2000
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Visitor Token"
+     }
+    },
+    "type": "object",
+    "required": [
+     "file"
+    ],
+    "title": "Body_send_image_v1_conversations__conversation_id__images_post"
+   },
+   "Body_upload_api_knowledge_bases__kb_id__imports_post": {
+    "properties": {
+     "file": {
+      "type": "string",
+      "contentMediaType": "application/octet-stream",
+      "title": "File"
+     }
+    },
+    "type": "object",
+    "required": [
+     "file"
+    ],
+    "title": "Body_upload_api_knowledge_bases__kb_id__imports_post"
+   },
+   "ChatCounts": {
+    "properties": {
+     "conversations": {
+      "type": "integer",
+      "title": "Conversations"
+     },
+     "messages": {
+      "type": "integer",
+      "title": "Messages"
+     },
+     "handoffs": {
+      "type": "integer",
+      "title": "Handoffs"
+     },
+     "down": {
+      "type": "integer",
+      "title": "Down"
+     },
+     "wrong": {
+      "type": "integer",
+      "title": "Wrong"
+     }
+    },
+    "type": "object",
+    "required": [
+     "conversations",
+     "messages",
+     "handoffs",
+     "down",
+     "wrong"
+    ],
+    "title": "ChatCounts"
+   },
+   "ChatDetail": {
+    "properties": {
+     "id": {
+      "type": "string",
+      "title": "Id"
+     },
+     "visitor_id": {
+      "type": "string",
+      "title": "Visitor Id"
+     },
+     "channel": {
+      "type": "string",
+      "title": "Channel"
+     },
+     "status": {
+      "type": "string",
+      "title": "Status"
+     },
+     "visitor_seen_at": {
+      "anyOf": [
+       {
+        "type": "string",
+        "format": "date-time"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Visitor Seen At"
+     },
+     "created_at": {
+      "type": "string",
+      "format": "date-time",
+      "title": "Created At"
+     },
+     "tokens": {
+      "type": "integer",
+      "title": "Tokens"
+     },
+     "messages": {
+      "items": {
+       "$ref": "#/components/schemas/ChatMessageOut"
+      },
+      "type": "array",
+      "title": "Messages"
+     },
+     "handoffs": {
+      "items": {
+       "$ref": "#/components/schemas/HandoffRecord"
+      },
+      "type": "array",
+      "title": "Handoffs"
+     }
+    },
+    "type": "object",
+    "required": [
+     "id",
+     "visitor_id",
+     "channel",
+     "status",
+     "visitor_seen_at",
+     "created_at",
+     "tokens",
+     "messages",
+     "handoffs"
+    ],
+    "title": "ChatDetail"
+   },
+   "ChatList": {
+    "properties": {
+     "counts": {
+      "$ref": "#/components/schemas/ChatCounts"
+     },
+     "rows": {
+      "items": {
+       "$ref": "#/components/schemas/ChatRow"
+      },
+      "type": "array",
+      "title": "Rows"
+     }
+    },
+    "type": "object",
+    "required": [
+     "counts",
+     "rows"
+    ],
+    "title": "ChatList"
+   },
+   "ChatMessageOut": {
+    "properties": {
+     "id": {
+      "type": "integer",
+      "title": "Id"
+     },
+     "role": {
+      "type": "string",
+      "title": "Role"
+     },
+     "text": {
+      "type": "string",
+      "title": "Text"
+     },
+     "sources": {
+      "items": {
+       "additionalProperties": true,
+       "type": "object"
+      },
+      "type": "array",
+      "title": "Sources"
+     },
+     "feedback": {
+      "anyOf": [
+       {
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Feedback"
+     },
+     "wrong_reason": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Wrong Reason"
+     },
+     "tokens": {
+      "type": "integer",
+      "title": "Tokens"
+     },
+     "seconds": {
+      "anyOf": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Seconds"
+     },
+     "created_at": {
+      "type": "string",
+      "format": "date-time",
+      "title": "Created At"
+     },
+     "steps": {
+      "items": {
+       "$ref": "#/components/schemas/StepOut"
+      },
+      "type": "array",
+      "title": "Steps"
+     },
+     "image": {
+      "anyOf": [
+       {
+        "$ref": "#/components/schemas/ImageOut"
+       },
+       {
+        "type": "null"
+       }
+      ]
+     }
+    },
+    "type": "object",
+    "required": [
+     "id",
+     "role",
+     "text",
+     "sources",
+     "feedback",
+     "wrong_reason",
+     "tokens",
+     "seconds",
+     "created_at",
+     "steps",
+     "image"
+    ],
+    "title": "ChatMessageOut"
+   },
+   "ChatRow": {
+    "properties": {
+     "id": {
+      "type": "string",
+      "title": "Id"
+     },
+     "visitor_id": {
+      "type": "string",
+      "title": "Visitor Id"
+     },
+     "channel": {
+      "type": "string",
+      "title": "Channel"
+     },
+     "created_at": {
+      "type": "string",
+      "format": "date-time",
+      "title": "Created At"
+     },
+     "first": {
+      "type": "string",
+      "title": "First"
+     },
+     "turns": {
+      "type": "integer",
+      "title": "Turns"
+     },
+     "status": {
+      "type": "string",
+      "title": "Status"
+     },
+     "down": {
+      "type": "boolean",
+      "title": "Down"
+     },
+     "wrong": {
+      "type": "boolean",
+      "title": "Wrong"
+     }
+    },
+    "type": "object",
+    "required": [
+     "id",
+     "visitor_id",
+     "channel",
+     "created_at",
+     "first",
+     "turns",
+     "status",
+     "down",
+     "wrong"
+    ],
+    "title": "ChatRow"
+   },
+   "ChunkOut": {
+    "properties": {
+     "id": {
+      "type": "integer",
+      "title": "Id"
+     },
+     "document": {
+      "type": "string",
+      "title": "Document"
+     },
+     "title": {
+      "type": "string",
+      "title": "Title"
+     },
+     "kind": {
+      "type": "string",
+      "title": "Kind"
+     },
+     "heading_path": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array",
+      "title": "Heading Path"
+     },
+     "text": {
+      "type": "string",
+      "title": "Text"
+     }
+    },
+    "type": "object",
+    "required": [
+     "id",
+     "document",
+     "title",
+     "kind",
+     "heading_path",
+     "text"
+    ],
+    "title": "ChunkOut"
+   },
+   "ChunkRow": {
+    "properties": {
+     "id": {
+      "type": "integer",
+      "title": "Id"
+     },
+     "seq": {
+      "type": "integer",
+      "title": "Seq"
+     },
+     "heading_path": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array",
+      "title": "Heading Path"
+     },
+     "text": {
+      "type": "string",
+      "title": "Text"
+     }
+    },
+    "type": "object",
+    "required": [
+     "id",
+     "seq",
+     "heading_path",
+     "text"
+    ],
+    "title": "ChunkRow"
+   },
+   "ChunkStats": {
+    "properties": {
+     "count": {
+      "type": "integer",
+      "title": "Count"
+     },
+     "average": {
+      "type": "integer",
+      "title": "Average"
+     },
+     "shortest": {
+      "type": "integer",
+      "title": "Shortest"
+     },
+     "longest": {
+      "type": "integer",
+      "title": "Longest"
+     },
+     "short": {
+      "type": "integer",
+      "title": "Short"
+     },
+     "long": {
+      "type": "integer",
+      "title": "Long"
+     }
+    },
+    "type": "object",
+    "required": [
+     "count",
+     "average",
+     "shortest",
+     "longest",
+     "short",
+     "long"
+    ],
+    "title": "ChunkStats"
+   },
+   "CompareRow": {
+    "properties": {
+     "id": {
+      "type": "string",
+      "title": "Id"
+     },
+     "question": {
+      "type": "string",
+      "title": "Question"
+     },
+     "kind": {
+      "type": "string",
+      "title": "Kind"
+     },
+     "expect_docs": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array",
+      "title": "Expect Docs"
+     },
+     "evidence": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array",
+      "title": "Evidence"
+     },
+     "reference": {
+      "type": "string",
+      "title": "Reference"
+     },
+     "trend": {
+      "type": "string",
+      "title": "Trend"
+     },
+     "base": {
+      "anyOf": [
+       {
+        "$ref": "#/components/schemas/ResultOut"
+       },
+       {
+        "type": "null"
+       }
+      ]
+     },
+     "target": {
+      "anyOf": [
+       {
+        "$ref": "#/components/schemas/ResultOut"
+       },
+       {
+        "type": "null"
+       }
+      ]
+     }
+    },
+    "type": "object",
+    "required": [
+     "id",
+     "question",
+     "kind",
+     "expect_docs",
+     "evidence",
+     "reference",
+     "trend",
+     "base",
+     "target"
+    ],
+    "title": "CompareRow"
+   },
+   "Comparison": {
+    "properties": {
+     "candidate": {
+      "$ref": "#/components/schemas/ChunkStats"
+     },
+     "current": {
+      "$ref": "#/components/schemas/ChunkStats"
+     }
+    },
+    "type": "object",
+    "required": [
+     "candidate",
+     "current"
+    ],
+    "title": "Comparison"
+   },
+   "ConfirmIn": {
+    "properties": {
+     "file_ids": {
+      "items": {
+       "type": "integer"
+      },
+      "type": "array",
+      "maxItems": 200,
+      "minItems": 1,
+      "title": "File Ids"
+     },
+     "index_id": {
+      "type": "integer",
+      "title": "Index Id"
+     }
+    },
+    "type": "object",
+    "required": [
+     "file_ids",
+     "index_id"
+    ],
+    "title": "ConfirmIn"
+   },
+   "ConversationIn": {
+    "properties": {
+     "index_id": {
+      "type": "integer",
+      "title": "Index Id"
+     },
+     "visitor_id": {
+      "type": "string",
+      "maxLength": 100,
+      "minLength": 1,
+      "title": "Visitor Id"
+     },
+     "channel": {
+      "type": "string",
+      "maxLength": 20,
+      "title": "Channel",
+      "default": "web"
+     }
+    },
+    "type": "object",
+    "required": [
+     "index_id",
+     "visitor_id"
+    ],
+    "title": "ConversationIn"
+   },
+   "ConversationOut": {
+    "properties": {
+     "id": {
+      "type": "string",
+      "title": "Id"
+     },
+     "status": {
+      "type": "string",
+      "title": "Status"
+     }
+    },
+    "type": "object",
+    "required": [
+     "id",
+     "status"
+    ],
+    "title": "ConversationOut"
+   },
+   "DatasetOut": {
+    "properties": {
+     "documents": {
+      "items": {
+       "$ref": "#/components/schemas/DocumentRow"
+      },
+      "type": "array",
+      "title": "Documents"
+     },
+     "chunks": {
+      "type": "integer",
+      "title": "Chunks"
+     },
+     "average_chars": {
+      "type": "integer",
+      "title": "Average Chars"
+     },
+     "embed_model": {
+      "type": "string",
+      "title": "Embed Model"
+     },
+     "can_sync": {
+      "type": "boolean",
+      "title": "Can Sync"
+     },
+     "busy": {
+      "type": "boolean",
+      "title": "Busy"
+     },
+     "last_job": {
+      "anyOf": [
+       {
+        "$ref": "#/components/schemas/JobOut"
+       },
+       {
+        "type": "null"
+       }
+      ]
+     }
+    },
+    "type": "object",
+    "required": [
+     "documents",
+     "chunks",
+     "average_chars",
+     "embed_model",
+     "can_sync",
+     "busy",
+     "last_job"
+    ],
+    "title": "DatasetOut"
+   },
+   "DayUsage": {
+    "properties": {
+     "day": {
+      "type": "string",
+      "format": "date",
+      "title": "Day"
+     },
+     "input_tokens": {
+      "type": "integer",
+      "title": "Input Tokens"
+     },
+     "cached_tokens": {
+      "type": "integer",
+      "title": "Cached Tokens"
+     },
+     "output_tokens": {
+      "type": "integer",
+      "title": "Output Tokens"
+     },
+     "cost": {
+      "type": "number",
+      "title": "Cost"
+     }
+    },
+    "type": "object",
+    "required": [
+     "day",
+     "input_tokens",
+     "cached_tokens",
+     "output_tokens",
+     "cost"
+    ],
+    "title": "DayUsage"
+   },
+   "DocumentDetail": {
+    "properties": {
+     "id": {
+      "type": "integer",
+      "title": "Id"
+     },
+     "title": {
+      "type": "string",
+      "title": "Title"
+     },
+     "kind": {
+      "type": "string",
+      "title": "Kind"
+     },
+     "markdown": {
+      "type": "string",
+      "title": "Markdown"
+     },
+     "chunks": {
+      "items": {
+       "$ref": "#/components/schemas/ChunkRow"
+      },
+      "type": "array",
+      "title": "Chunks"
+     }
+    },
+    "type": "object",
+    "required": [
+     "id",
+     "title",
+     "kind",
+     "markdown",
+     "chunks"
+    ],
+    "title": "DocumentDetail"
+   },
+   "DocumentRow": {
+    "properties": {
+     "id": {
+      "type": "integer",
+      "title": "Id"
+     },
+     "source_id": {
+      "type": "string",
+      "title": "Source Id"
+     },
+     "lang": {
+      "type": "string",
+      "title": "Lang"
+     },
+     "title": {
+      "type": "string",
+      "title": "Title"
+     },
+     "kind": {
+      "type": "string",
+      "title": "Kind"
+     },
+     "chars": {
+      "type": "integer",
+      "title": "Chars"
+     },
+     "chunks": {
+      "type": "integer",
+      "title": "Chunks"
+     },
+     "stale": {
+      "type": "boolean",
+      "title": "Stale"
+     }
+    },
+    "type": "object",
+    "required": [
+     "id",
+     "source_id",
+     "lang",
+     "title",
+     "kind",
+     "chars",
+     "chunks",
+     "stale"
+    ],
+    "title": "DocumentRow"
+   },
+   "DraftOut": {
+    "properties": {
+     "text": {
+      "type": "string",
+      "title": "Text"
+     },
+     "sources": {
+      "items": {
+       "$ref": "#/components/schemas/DraftSource"
+      },
+      "type": "array",
+      "title": "Sources"
+     },
+     "orders_at": {
+      "anyOf": [
+       {
+        "type": "string",
+        "format": "date-time"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Orders At"
+     },
+     "open_points": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array",
+      "title": "Open Points"
+     }
+    },
+    "type": "object",
+    "required": [
+     "text",
+     "sources",
+     "orders_at",
+     "open_points"
+    ],
+    "title": "DraftOut"
+   },
+   "DraftSource": {
+    "properties": {
+     "title": {
+      "type": "string",
+      "title": "Title"
+     },
+     "document": {
+      "type": "string",
+      "title": "Document"
+     }
+    },
+    "type": "object",
+    "required": [
+     "title",
+     "document"
+    ],
+    "title": "DraftSource"
+   },
+   "EditIn": {
+    "properties": {
+     "markdown": {
+      "type": "string",
+      "maxLength": 2000000,
+      "minLength": 1,
+      "title": "Markdown"
+     }
+    },
+    "type": "object",
+    "required": [
+     "markdown"
+    ],
+    "title": "EditIn"
+   },
+   "FeedbackIn": {
+    "properties": {
+     "useful": {
+      "anyOf": [
+       {
+        "type": "boolean"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Useful"
+     }
+    },
+    "type": "object",
+    "required": [
+     "useful"
+    ],
+    "title": "FeedbackIn"
+   },
+   "FileDetail": {
+    "properties": {
+     "id": {
+      "type": "integer",
+      "title": "Id"
+     },
+     "filename": {
+      "type": "string",
+      "title": "Filename"
+     },
+     "suffix": {
+      "type": "string",
+      "title": "Suffix"
+     },
+     "size": {
+      "type": "integer",
+      "title": "Size"
+     },
+     "status": {
+      "type": "string",
+      "title": "Status"
+     },
+     "parser": {
+      "type": "string",
+      "title": "Parser"
+     },
+     "parsers": {
+      "items": {
+       "$ref": "#/components/schemas/ParserOut"
+      },
+      "type": "array",
+      "title": "Parsers"
+     },
+     "checks": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array",
+      "title": "Checks"
+     },
+     "warnings": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array",
+      "title": "Warnings"
+     },
+     "error": {
+      "type": "string",
+      "title": "Error"
+     },
+     "previewable": {
+      "type": "boolean",
+      "title": "Previewable"
+     },
+     "created_at": {
+      "type": "string",
+      "format": "date-time",
+      "title": "Created At"
+     },
+     "markdown": {
+      "type": "string",
+      "title": "Markdown"
+     }
+    },
+    "type": "object",
+    "required": [
+     "id",
+     "filename",
+     "suffix",
+     "size",
+     "status",
+     "parser",
+     "parsers",
+     "checks",
+     "warnings",
+     "error",
+     "previewable",
+     "created_at",
+     "markdown"
+    ],
+    "title": "FileDetail"
+   },
+   "FileRow": {
+    "properties": {
+     "id": {
+      "type": "integer",
+      "title": "Id"
+     },
+     "filename": {
+      "type": "string",
+      "title": "Filename"
+     },
+     "suffix": {
+      "type": "string",
+      "title": "Suffix"
+     },
+     "size": {
+      "type": "integer",
+      "title": "Size"
+     },
+     "status": {
+      "type": "string",
+      "title": "Status"
+     },
+     "parser": {
+      "type": "string",
+      "title": "Parser"
+     },
+     "parsers": {
+      "items": {
+       "$ref": "#/components/schemas/ParserOut"
+      },
+      "type": "array",
+      "title": "Parsers"
+     },
+     "checks": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array",
+      "title": "Checks"
+     },
+     "warnings": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array",
+      "title": "Warnings"
+     },
+     "error": {
+      "type": "string",
+      "title": "Error"
+     },
+     "previewable": {
+      "type": "boolean",
+      "title": "Previewable"
+     },
+     "created_at": {
+      "type": "string",
+      "format": "date-time",
+      "title": "Created At"
+     }
+    },
+    "type": "object",
+    "required": [
+     "id",
+     "filename",
+     "suffix",
+     "size",
+     "status",
+     "parser",
+     "parsers",
+     "checks",
+     "warnings",
+     "error",
+     "previewable",
+     "created_at"
+    ],
+    "title": "FileRow"
+   },
+   "HTTPValidationError": {
+    "properties": {
+     "detail": {
+      "items": {
+       "$ref": "#/components/schemas/ValidationError"
+      },
+      "type": "array",
+      "title": "Detail"
+     }
+    },
+    "type": "object",
+    "title": "HTTPValidationError"
+   },
+   "HandoffIn": {
+    "properties": {
+     "email": {
+      "type": "string",
+      "maxLength": 200,
+      "title": "Email",
+      "default": ""
+     },
+     "visitor_token": {
+      "anyOf": [
+       {
+        "type": "string",
+        "maxLength": 2000
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Visitor Token"
+     }
+    },
+    "type": "object",
+    "title": "HandoffIn"
+   },
+   "HandoffList": {
+    "properties": {
+     "counts": {
+      "additionalProperties": {
+       "type": "integer"
+      },
+      "type": "object",
+      "title": "Counts"
+     },
+     "rows": {
+      "items": {
+       "$ref": "#/components/schemas/HandoffRecord"
+      },
+      "type": "array",
+      "title": "Rows"
+     }
+    },
+    "type": "object",
+    "required": [
+     "counts",
+     "rows"
+    ],
+    "title": "HandoffList"
+   },
+   "HandoffOut": {
+    "properties": {
+     "kind": {
+      "type": "string",
+      "title": "Kind"
+     },
+     "ticket_no": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Ticket No"
+     },
+     "email": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Email"
+     },
+     "reply_hours": {
+      "type": "integer",
+      "title": "Reply Hours"
+     },
+     "away_message": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Away Message"
+     }
+    },
+    "type": "object",
+    "required": [
+     "kind",
+     "ticket_no",
+     "email",
+     "reply_hours",
+     "away_message"
+    ],
+    "title": "HandoffOut"
+   },
+   "HandoffRecord": {
+    "properties": {
+     "id": {
+      "type": "integer",
+      "title": "Id"
+     },
+     "conversation_id": {
+      "type": "string",
+      "title": "Conversation Id"
+     },
+     "visitor_id": {
+      "type": "string",
+      "title": "Visitor Id"
+     },
+     "kind": {
+      "type": "string",
+      "title": "Kind"
+     },
+     "ticket_no": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Ticket No"
+     },
+     "email": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Email"
+     },
+     "summary": {
+      "type": "string",
+      "title": "Summary"
+     },
+     "status": {
+      "type": "string",
+      "title": "Status"
+     },
+     "created_at": {
+      "type": "string",
+      "format": "date-time",
+      "title": "Created At"
+     }
+    },
+    "type": "object",
+    "required": [
+     "id",
+     "conversation_id",
+     "visitor_id",
+     "kind",
+     "ticket_no",
+     "email",
+     "summary",
+     "status",
+     "created_at"
+    ],
+    "title": "HandoffRecord"
+   },
+   "HandoffResult": {
+    "properties": {
+     "status": {
+      "type": "string",
+      "title": "Status"
+     },
+     "handoff": {
+      "anyOf": [
+       {
+        "$ref": "#/components/schemas/HandoffOut"
+       },
+       {
+        "type": "null"
+       }
+      ]
+     }
+    },
+    "type": "object",
+    "required": [
+     "status",
+     "handoff"
+    ],
+    "title": "HandoffResult"
+   },
+   "HistoryOut": {
+    "properties": {
+     "id": {
+      "type": "string",
+      "title": "Id"
+     },
+     "status": {
+      "type": "string",
+      "title": "Status"
+     },
+     "messages": {
+      "items": {
+       "$ref": "#/components/schemas/MessageOut"
+      },
+      "type": "array",
+      "title": "Messages"
+     },
+     "handoff": {
+      "anyOf": [
+       {
+        "$ref": "#/components/schemas/HandoffOut"
+       },
+       {
+        "type": "null"
+       }
+      ]
+     }
+    },
+    "type": "object",
+    "required": [
+     "id",
+     "status",
+     "messages",
+     "handoff"
+    ],
+    "title": "HistoryOut"
+   },
+   "HitOut": {
+    "properties": {
+     "chunk_id": {
+      "type": "integer",
+      "title": "Chunk Id"
+     },
+     "score": {
+      "type": "number",
+      "title": "Score"
+     }
+    },
+    "type": "object",
+    "required": [
+     "chunk_id",
+     "score"
+    ],
+    "title": "HitOut"
+   },
+   "ImageOut": {
+    "properties": {
+     "id": {
+      "type": "integer",
+      "title": "Id"
+     },
+     "width": {
+      "type": "integer",
+      "title": "Width"
+     },
+     "height": {
+      "type": "integer",
+      "title": "Height"
+     }
+    },
+    "type": "object",
+    "required": [
+     "id",
+     "width",
+     "height"
+    ],
+    "title": "ImageOut"
+   },
+   "IndexOut": {
+    "properties": {
+     "id": {
+      "type": "integer",
+      "title": "Id"
+     },
+     "name": {
+      "type": "string",
+      "title": "Name"
+     },
+     "chunker": {
+      "type": "string",
+      "title": "Chunker"
+     },
+     "chunk_size": {
+      "type": "integer",
+      "title": "Chunk Size"
+     },
+     "overlap": {
+      "type": "integer",
+      "title": "Overlap"
+     },
+     "embed_model": {
+      "type": "string",
+      "title": "Embed Model"
+     },
+     "chunks": {
+      "type": "integer",
+      "title": "Chunks"
+     }
+    },
+    "type": "object",
+    "required": [
+     "id",
+     "name",
+     "chunker",
+     "chunk_size",
+     "overlap",
+     "embed_model",
+     "chunks"
+    ],
+    "title": "IndexOut"
+   },
+   "JobOut": {
+    "properties": {
+     "status": {
+      "type": "string",
+      "title": "Status"
+     },
+     "total": {
+      "type": "integer",
+      "title": "Total"
+     },
+     "progress": {
+      "additionalProperties": {
+       "type": "integer"
+      },
+      "type": "object",
+      "title": "Progress"
+     },
+     "error": {
+      "type": "string",
+      "title": "Error"
+     },
+     "finished_at": {
+      "anyOf": [
+       {
+        "type": "string",
+        "format": "date-time"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Finished At"
+     }
+    },
+    "type": "object",
+    "required": [
+     "status",
+     "total",
+     "progress",
+     "error",
+     "finished_at"
+    ],
+    "title": "JobOut"
+   },
+   "KindScores": {
+    "properties": {
+     "n": {
+      "type": "integer",
+      "title": "N"
+     },
+     "hit1": {
+      "type": "number",
+      "title": "Hit1"
+     },
+     "hit3": {
+      "type": "number",
+      "title": "Hit3"
+     },
+     "hit5": {
+      "type": "number",
+      "title": "Hit5"
+     },
+     "mrr": {
+      "type": "number",
+      "title": "Mrr"
+     }
+    },
+    "type": "object",
+    "required": [
+     "n",
+     "hit1",
+     "hit3",
+     "hit5",
+     "mrr"
+    ],
+    "title": "KindScores"
+   },
+   "KnowledgeBaseOut": {
+    "properties": {
+     "id": {
+      "type": "integer",
+      "title": "Id"
+     },
+     "name": {
+      "type": "string",
+      "title": "Name"
+     },
+     "documents": {
+      "type": "integer",
+      "title": "Documents"
+     },
+     "questions": {
+      "type": "integer",
+      "title": "Questions"
+     },
+     "indexes": {
+      "items": {
+       "$ref": "#/components/schemas/IndexOut"
+      },
+      "type": "array",
+      "title": "Indexes"
+     }
+    },
+    "type": "object",
+    "required": [
+     "id",
+     "name",
+     "documents",
+     "questions",
+     "indexes"
+    ],
+    "title": "KnowledgeBaseOut"
+   },
+   "LoginIn": {
+    "properties": {
+     "username": {
+      "type": "string",
+      "title": "Username"
+     },
+     "password": {
+      "type": "string",
+      "title": "Password"
+     }
+    },
+    "type": "object",
+    "required": [
+     "username",
+     "password"
+    ],
+    "title": "LoginIn"
+   },
+   "MeOut": {
+    "properties": {
+     "username": {
+      "type": "string",
+      "title": "Username"
+     }
+    },
+    "type": "object",
+    "required": [
+     "username"
+    ],
+    "title": "MeOut"
+   },
+   "MessageOut": {
+    "properties": {
+     "id": {
+      "type": "integer",
+      "title": "Id"
+     },
+     "role": {
+      "type": "string",
+      "title": "Role"
+     },
+     "text": {
+      "type": "string",
+      "title": "Text"
+     },
+     "sources": {
+      "items": {
+       "additionalProperties": true,
+       "type": "object"
+      },
+      "type": "array",
+      "title": "Sources"
+     },
+     "feedback": {
+      "anyOf": [
+       {
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Feedback"
+     },
+     "image": {
+      "anyOf": [
+       {
+        "$ref": "#/components/schemas/ImageOut"
+       },
+       {
+        "type": "null"
+       }
+      ]
+     }
+    },
+    "type": "object",
+    "required": [
+     "id",
+     "role",
+     "text",
+     "sources",
+     "feedback",
+     "image"
+    ],
+    "title": "MessageOut"
+   },
+   "ParserOut": {
+    "properties": {
+     "name": {
+      "type": "string",
+      "title": "Name"
+     },
+     "label": {
+      "type": "string",
+      "title": "Label"
+     }
+    },
+    "type": "object",
+    "required": [
+     "name",
+     "label"
+    ],
+    "title": "ParserOut"
+   },
+   "PlaygroundIn": {
+    "properties": {
+     "index_id": {
+      "type": "integer",
+      "title": "Index Id"
+     },
+     "question": {
+      "type": "string",
+      "maxLength": 500,
+      "minLength": 1,
+      "title": "Question"
+     },
+     "recipe": {
+      "$ref": "#/components/schemas/RecipeIn",
+      "default": {
+       "dense": true,
+       "keyword": true,
+       "expand": false,
+       "rerank": 0,
+       "candidates": 20,
+       "limit": 5
+      }
+     },
+     "answer": {
+      "type": "boolean",
+      "title": "Answer",
+      "default": true
+     }
+    },
+    "type": "object",
+    "required": [
+     "index_id",
+     "question"
+    ],
+    "title": "PlaygroundIn"
+   },
+   "PlaygroundOut": {
+    "properties": {
+     "trace_id": {
+      "type": "integer",
+      "title": "Trace Id"
+     },
+     "recipe": {
+      "$ref": "#/components/schemas/RecipeIn"
+     },
+     "retrieval_ms": {
+      "type": "integer",
+      "title": "Retrieval Ms"
+     },
+     "stages": {
+      "items": {
+       "$ref": "#/components/schemas/StageOut"
+      },
+      "type": "array",
+      "title": "Stages"
+     },
+     "selected": {
+      "items": {
+       "type": "integer"
+      },
+      "type": "array",
+      "title": "Selected"
+     },
+     "chunks": {
+      "items": {
+       "$ref": "#/components/schemas/ChunkOut"
+      },
+      "type": "array",
+      "title": "Chunks"
+     },
+     "answer": {
+      "anyOf": [
+       {
+        "$ref": "#/components/schemas/AnswerOut"
+       },
+       {
+        "type": "null"
+       }
+      ]
+     },
+     "answer_error": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Answer Error"
+     }
+    },
+    "type": "object",
+    "required": [
+     "trace_id",
+     "recipe",
+     "retrieval_ms",
+     "stages",
+     "selected",
+     "chunks",
+     "answer",
+     "answer_error"
+    ],
+    "title": "PlaygroundOut"
+   },
+   "PreviewChunk": {
+    "properties": {
+     "heading_path": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array",
+      "title": "Heading Path"
+     },
+     "text": {
+      "type": "string",
+      "title": "Text"
+     },
+     "overlap": {
+      "type": "integer",
+      "title": "Overlap"
+     }
+    },
+    "type": "object",
+    "required": [
+     "heading_path",
+     "text",
+     "overlap"
+    ],
+    "title": "PreviewChunk"
+   },
+   "PreviewIn": {
+    "properties": {
+     "chunker": {
+      "type": "string",
+      "enum": [
+       "heading",
+       "fixed"
+      ],
+      "title": "Chunker"
+     },
+     "size": {
+      "type": "integer",
+      "maximum": 1200.0,
+      "minimum": 100.0,
+      "title": "Size"
+     },
+     "overlap": {
+      "type": "integer",
+      "maximum": 300.0,
+      "minimum": 0.0,
+      "title": "Overlap"
+     },
+     "index_id": {
+      "type": "integer",
+      "title": "Index Id"
+     },
+     "document_id": {
+      "type": "integer",
+      "title": "Document Id"
+     }
+    },
+    "type": "object",
+    "required": [
+     "chunker",
+     "size",
+     "overlap",
+     "index_id",
+     "document_id"
+    ],
+    "title": "PreviewIn"
+   },
+   "PreviewOut": {
+    "properties": {
+     "chunks": {
+      "items": {
+       "$ref": "#/components/schemas/PreviewChunk"
+      },
+      "type": "array",
+      "title": "Chunks"
+     },
+     "document": {
+      "$ref": "#/components/schemas/Comparison"
+     },
+     "knowledge_base": {
+      "$ref": "#/components/schemas/Comparison"
+     }
+    },
+    "type": "object",
+    "required": [
+     "chunks",
+     "document",
+     "knowledge_base"
+    ],
+    "title": "PreviewOut"
+   },
+   "RecipeIn": {
+    "properties": {
+     "dense": {
+      "type": "boolean",
+      "title": "Dense",
+      "default": true
+     },
+     "keyword": {
+      "type": "boolean",
+      "title": "Keyword",
+      "default": true
+     },
+     "expand": {
+      "type": "boolean",
+      "title": "Expand",
+      "default": false
+     },
+     "rerank": {
+      "type": "integer",
+      "maximum": 40.0,
+      "minimum": 0.0,
+      "title": "Rerank",
+      "default": 0
+     },
+     "candidates": {
+      "type": "integer",
+      "maximum": 50.0,
+      "minimum": 1.0,
+      "title": "Candidates",
+      "default": 20
+     },
+     "limit": {
+      "type": "integer",
+      "maximum": 20.0,
+      "minimum": 1.0,
+      "title": "Limit",
+      "default": 5
+     }
+    },
+    "type": "object",
+    "title": "RecipeIn"
+   },
+   "ReparseIn": {
+    "properties": {
+     "parser": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Parser"
+     }
+    },
+    "type": "object",
+    "title": "ReparseIn"
+   },
+   "ReplyIn": {
+    "properties": {
+     "text": {
+      "type": "string",
+      "maxLength": 4000,
+      "minLength": 1,
+      "title": "Text"
+     }
+    },
+    "type": "object",
+    "required": [
+     "text"
+    ],
+    "title": "ReplyIn"
+   },
+   "ResultOut": {
+    "properties": {
+     "rank": {
+      "anyOf": [
+       {
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Rank"
+     },
+     "coverage": {
+      "anyOf": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Coverage"
+     },
+     "correct": {
+      "anyOf": [
+       {
+        "type": "boolean"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Correct"
+     },
+     "answer": {
+      "type": "string",
+      "title": "Answer"
+     }
+    },
+    "type": "object",
+    "required": [
+     "rank",
+     "coverage",
+     "correct",
+     "answer"
+    ],
+    "title": "ResultOut"
+   },
+   "RunIn": {
+    "properties": {
+     "index_id": {
+      "type": "integer",
+      "title": "Index Id"
+     },
+     "recipe": {
+      "$ref": "#/components/schemas/RecipeIn",
+      "default": {
+       "dense": true,
+       "keyword": true,
+       "expand": false,
+       "rerank": 0,
+       "candidates": 20,
+       "limit": 5
+      }
+     },
+     "answers": {
+      "type": "boolean",
+      "title": "Answers",
+      "default": false
+     }
+    },
+    "type": "object",
+    "required": [
+     "index_id"
+    ],
+    "title": "RunIn"
+   },
+   "RunOut": {
+    "properties": {
+     "id": {
+      "type": "integer",
+      "title": "Id"
+     },
+     "index_id": {
+      "type": "integer",
+      "title": "Index Id"
+     },
+     "index_name": {
+      "type": "string",
+      "title": "Index Name"
+     },
+     "embed_model": {
+      "type": "string",
+      "title": "Embed Model"
+     },
+     "chunker": {
+      "type": "string",
+      "title": "Chunker"
+     },
+     "chunk_size": {
+      "type": "integer",
+      "title": "Chunk Size"
+     },
+     "answers": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Answers"
+     },
+     "recipe": {
+      "anyOf": [
+       {
+        "$ref": "#/components/schemas/RecipeIn"
+       },
+       {
+        "type": "null"
+       }
+      ]
+     },
+     "status": {
+      "type": "string",
+      "title": "Status"
+     },
+     "done": {
+      "type": "integer",
+      "title": "Done"
+     },
+     "total": {
+      "type": "integer",
+      "title": "Total"
+     },
+     "error": {
+      "type": "string",
+      "title": "Error"
+     },
+     "scores": {
+      "$ref": "#/components/schemas/Scores"
+     },
+     "created_at": {
+      "type": "string",
+      "format": "date-time",
+      "title": "Created At"
+     }
+    },
+    "type": "object",
+    "required": [
+     "id",
+     "index_id",
+     "index_name",
+     "embed_model",
+     "chunker",
+     "chunk_size",
+     "answers",
+     "recipe",
+     "status",
+     "done",
+     "total",
+     "error",
+     "scores",
+     "created_at"
+    ],
+    "title": "RunOut"
+   },
+   "SaveIn": {
+    "properties": {
+     "chunker": {
+      "type": "string",
+      "enum": [
+       "heading",
+       "fixed"
+      ],
+      "title": "Chunker"
+     },
+     "size": {
+      "type": "integer",
+      "maximum": 1200.0,
+      "minimum": 100.0,
+      "title": "Size"
+     },
+     "overlap": {
+      "type": "integer",
+      "maximum": 300.0,
+      "minimum": 0.0,
+      "title": "Overlap"
+     },
+     "index_id": {
+      "type": "integer",
+      "title": "Index Id"
+     },
+     "name": {
+      "type": "string",
+      "maxLength": 50,
+      "minLength": 1,
+      "pattern": "^[\\w.-]+$",
+      "title": "Name"
+     }
+    },
+    "type": "object",
+    "required": [
+     "chunker",
+     "size",
+     "overlap",
+     "index_id",
+     "name"
+    ],
+    "title": "SaveIn"
+   },
+   "SaveOut": {
+    "properties": {
+     "id": {
+      "type": "integer",
+      "title": "Id"
+     }
+    },
+    "type": "object",
+    "required": [
+     "id"
+    ],
+    "title": "SaveOut"
+   },
+   "Scores": {
+    "properties": {
+     "retrieval": {
+      "anyOf": [
+       {
+        "$ref": "#/components/schemas/KindScores"
+       },
+       {
+        "type": "null"
+       }
+      ]
+     },
+     "by_kind": {
+      "additionalProperties": {
+       "$ref": "#/components/schemas/KindScores"
+      },
+      "type": "object",
+      "title": "By Kind"
+     },
+     "evidence": {
+      "anyOf": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Evidence"
+     },
+     "answered": {
+      "anyOf": [
+       {
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Answered"
+     },
+     "correct": {
+      "anyOf": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Correct"
+     }
+    },
+    "type": "object",
+    "required": [
+     "retrieval",
+     "by_kind",
+     "evidence",
+     "answered",
+     "correct"
+    ],
+    "title": "Scores"
+   },
+   "SendIn": {
+    "properties": {
+     "text": {
+      "type": "string",
+      "maxLength": 4000,
+      "minLength": 1,
+      "title": "Text"
+     },
+     "visitor_token": {
+      "anyOf": [
+       {
+        "type": "string",
+        "maxLength": 2000
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Visitor Token"
+     }
+    },
+    "type": "object",
+    "required": [
+     "text"
+    ],
+    "title": "SendIn"
+   },
+   "ServiceSettingsIO": {
+    "properties": {
+     "enabled": {
+      "type": "boolean",
+      "title": "Enabled"
+     },
+     "per_visitor_day": {
+      "type": "integer",
+      "maximum": 10000.0,
+      "minimum": 1.0,
+      "title": "Per Visitor Day"
+     },
+     "per_conversation": {
+      "type": "integer",
+      "maximum": 1000.0,
+      "minimum": 1.0,
+      "title": "Per Conversation"
+     },
+     "max_message_chars": {
+      "type": "integer",
+      "maximum": 4000.0,
+      "minimum": 50.0,
+      "title": "Max Message Chars"
+     },
+     "daily_token_limit": {
+      "type": "integer",
+      "minimum": 1000.0,
+      "title": "Daily Token Limit"
+     },
+     "price_input": {
+      "type": "number",
+      "minimum": 0.0,
+      "title": "Price Input"
+     },
+     "price_cached_input": {
+      "type": "number",
+      "minimum": 0.0,
+      "title": "Price Cached Input"
+     },
+     "price_output": {
+      "type": "number",
+      "minimum": 0.0,
+      "title": "Price Output"
+     }
+    },
+    "type": "object",
+    "required": [
+     "enabled",
+     "per_visitor_day",
+     "per_conversation",
+     "max_message_chars",
+     "daily_token_limit",
+     "price_input",
+     "price_cached_input",
+     "price_output"
+    ],
+    "title": "ServiceSettingsIO"
+   },
+   "ServiceStateOut": {
+    "properties": {
+     "enabled": {
+      "type": "boolean",
+      "title": "Enabled"
+     },
+     "per_visitor_day": {
+      "type": "integer",
+      "maximum": 10000.0,
+      "minimum": 1.0,
+      "title": "Per Visitor Day"
+     },
+     "per_conversation": {
+      "type": "integer",
+      "maximum": 1000.0,
+      "minimum": 1.0,
+      "title": "Per Conversation"
+     },
+     "max_message_chars": {
+      "type": "integer",
+      "maximum": 4000.0,
+      "minimum": 50.0,
+      "title": "Max Message Chars"
+     },
+     "daily_token_limit": {
+      "type": "integer",
+      "minimum": 1000.0,
+      "title": "Daily Token Limit"
+     },
+     "price_input": {
+      "type": "number",
+      "minimum": 0.0,
+      "title": "Price Input"
+     },
+     "price_cached_input": {
+      "type": "number",
+      "minimum": 0.0,
+      "title": "Price Cached Input"
+     },
+     "price_output": {
+      "type": "number",
+      "minimum": 0.0,
+      "title": "Price Output"
+     },
+     "used_today": {
+      "type": "integer",
+      "title": "Used Today"
+     },
+     "open_now": {
+      "type": "boolean",
+      "title": "Open Now"
+     }
+    },
+    "type": "object",
+    "required": [
+     "enabled",
+     "per_visitor_day",
+     "per_conversation",
+     "max_message_chars",
+     "daily_token_limit",
+     "price_input",
+     "price_cached_input",
+     "price_output",
+     "used_today",
+     "open_now"
+    ],
+    "title": "ServiceStateOut"
+   },
+   "ShopOut": {
+    "properties": {
+     "name": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Name"
+     },
+     "online": {
+      "anyOf": [
+       {
+        "type": "boolean"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Online"
+     }
+    },
+    "type": "object",
+    "required": [
+     "name",
+     "online"
+    ],
+    "title": "ShopOut"
+   },
+   "StageOut": {
+    "properties": {
+     "name": {
+      "type": "string",
+      "title": "Name"
+     },
+     "ms": {
+      "type": "integer",
+      "title": "Ms"
+     },
+     "query": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Query"
+     },
+     "queries": {
+      "anyOf": [
+       {
+        "items": {
+         "type": "string"
+        },
+        "type": "array"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Queries"
+     },
+     "hits": {
+      "items": {
+       "$ref": "#/components/schemas/HitOut"
+      },
+      "type": "array",
+      "title": "Hits"
+     }
+    },
+    "type": "object",
+    "required": [
+     "name",
+     "ms",
+     "hits"
+    ],
+    "title": "StageOut"
+   },
+   "StatusOut": {
+    "properties": {
+     "enabled": {
+      "type": "boolean",
+      "title": "Enabled"
+     },
+     "max_message_chars": {
+      "type": "integer",
+      "title": "Max Message Chars"
+     },
+     "suggestions": {
+      "additionalProperties": {
+       "items": {
+        "type": "string"
+       },
+       "type": "array"
+      },
+      "type": "object",
+      "title": "Suggestions"
+     }
+    },
+    "type": "object",
+    "required": [
+     "enabled",
+     "max_message_chars",
+     "suggestions"
+    ],
+    "title": "StatusOut"
+   },
+   "StepOut": {
+    "properties": {
+     "name": {
+      "type": "string",
+      "title": "Name"
+     },
+     "arguments": {
+      "additionalProperties": true,
+      "type": "object",
+      "title": "Arguments"
+     },
+     "result": {
+      "type": "string",
+      "title": "Result"
+     },
+     "ms": {
+      "type": "integer",
+      "title": "Ms"
+     }
+    },
+    "type": "object",
+    "required": [
+     "name",
+     "arguments",
+     "result",
+     "ms"
+    ],
+    "title": "StepOut"
+   },
+   "SystemOut": {
+    "properties": {
+     "llm_model": {
+      "type": "string",
+      "title": "Llm Model"
+     },
+     "timezone": {
+      "type": "string",
+      "title": "Timezone"
+     },
+     "service_key_set": {
+      "type": "boolean",
+      "title": "Service Key Set"
+     },
+     "telegram": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Telegram"
+     }
+    },
+    "type": "object",
+    "required": [
+     "llm_model",
+     "timezone",
+     "service_key_set",
+     "telegram"
+    ],
+    "title": "SystemOut"
+   },
+   "TaskOut": {
+    "properties": {
+     "type": {
+      "type": "string",
+      "enum": [
+       "index",
+       "eval"
+      ],
+      "title": "Type"
+     },
+     "id": {
+      "type": "integer",
+      "title": "Id"
+     },
+     "title": {
+      "type": "string",
+      "title": "Title"
+     },
+     "knowledge_base": {
+      "type": "string",
+      "title": "Knowledge Base"
+     },
+     "index_id": {
+      "type": "integer",
+      "title": "Index Id"
+     },
+     "index_name": {
+      "type": "string",
+      "title": "Index Name"
+     },
+     "status": {
+      "type": "string",
+      "title": "Status"
+     },
+     "done": {
+      "type": "integer",
+      "title": "Done"
+     },
+     "total": {
+      "type": "integer",
+      "title": "Total"
+     },
+     "stages": {
+      "items": {
+       "$ref": "#/components/schemas/TaskStage"
+      },
+      "type": "array",
+      "title": "Stages"
+     },
+     "error": {
+      "type": "string",
+      "title": "Error"
+     },
+     "retryable": {
+      "type": "boolean",
+      "title": "Retryable"
+     },
+     "started_at": {
+      "type": "string",
+      "format": "date-time",
+      "title": "Started At"
+     },
+     "finished_at": {
+      "anyOf": [
+       {
+        "type": "string",
+        "format": "date-time"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Finished At"
+     }
+    },
+    "type": "object",
+    "required": [
+     "type",
+     "id",
+     "title",
+     "knowledge_base",
+     "index_id",
+     "index_name",
+     "status",
+     "done",
+     "total",
+     "stages",
+     "error",
+     "retryable",
+     "started_at",
+     "finished_at"
+    ],
+    "title": "TaskOut"
+   },
+   "TaskStage": {
+    "properties": {
+     "name": {
+      "type": "string",
+      "title": "Name"
+     },
+     "done": {
+      "type": "integer",
+      "title": "Done"
+     },
+     "total": {
+      "type": "integer",
+      "title": "Total"
+     }
+    },
+    "type": "object",
+    "required": [
+     "name",
+     "done",
+     "total"
+    ],
+    "title": "TaskStage"
+   },
+   "TasksOut": {
+    "properties": {
+     "tasks": {
+      "items": {
+       "$ref": "#/components/schemas/TaskOut"
+      },
+      "type": "array",
+      "title": "Tasks"
+     },
+     "device": {
+      "type": "string",
+      "title": "Device"
+     },
+     "embed_speed": {
+      "anyOf": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Embed Speed"
+     }
+    },
+    "type": "object",
+    "required": [
+     "tasks",
+     "device",
+     "embed_speed"
+    ],
+    "title": "TasksOut"
+   },
+   "UsageOut": {
+    "properties": {
+     "days": {
+      "items": {
+       "$ref": "#/components/schemas/DayUsage"
+      },
+      "type": "array",
+      "title": "Days"
+     },
+     "used_today": {
+      "type": "integer",
+      "title": "Used Today"
+     },
+     "limit": {
+      "type": "integer",
+      "title": "Limit"
+     },
+     "open_now": {
+      "type": "boolean",
+      "title": "Open Now"
+     },
+     "turns_today": {
+      "type": "integer",
+      "title": "Turns Today"
+     },
+     "cost_month": {
+      "type": "number",
+      "title": "Cost Month"
+     },
+     "priced": {
+      "type": "boolean",
+      "title": "Priced"
+     }
+    },
+    "type": "object",
+    "required": [
+     "days",
+     "used_today",
+     "limit",
+     "open_now",
+     "turns_today",
+     "cost_month",
+     "priced"
+    ],
+    "title": "UsageOut"
+   },
+   "ValidationError": {
+    "properties": {
+     "loc": {
+      "items": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "integer"
+        }
+       ]
+      },
+      "type": "array",
+      "title": "Location"
+     },
+     "msg": {
+      "type": "string",
+      "title": "Message"
+     },
+     "type": {
+      "type": "string",
+      "title": "Error Type"
+     },
+     "input": {
+      "title": "Input"
+     },
+     "ctx": {
+      "type": "object",
+      "title": "Context"
+     }
+    },
+    "type": "object",
+    "required": [
+     "loc",
+     "msg",
+     "type"
+    ],
+    "title": "ValidationError"
+   },
+   "WidgetSettings": {
+    "properties": {
+     "suggestions": {
+      "patternProperties": {
+       "^[a-z]{2}(-[A-Z]{2})?$": {
+        "items": {
+         "type": "string",
+         "maxLength": 60,
+         "minLength": 1
+        },
+        "type": "array",
+        "maxItems": 6
+       }
+      },
+      "type": "object",
+      "title": "Suggestions"
+     }
+    },
+    "type": "object",
+    "required": [
+     "suggestions"
+    ],
+    "title": "WidgetSettings"
+   },
+   "WrongIn": {
+    "properties": {
+     "reason": {
+      "anyOf": [
+       {
+        "type": "string",
+        "maxLength": 500
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Reason"
+     }
+    },
+    "type": "object",
+    "title": "WrongIn"
+   }
+  }
+ }
+}

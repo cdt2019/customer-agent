@@ -1,0 +1,21 @@
+# 管理后台：页面是打包好的静态文件，/api 转给客服服务。对话接口 /v1 不从这里出去，只给接入方在内部网络里调。
+:80 {
+	encode gzip
+
+	header {
+		X-Content-Type-Options nosniff
+		X-Frame-Options DENY
+		Referrer-Policy no-referrer
+		-Server
+	}
+
+	handle /api/* {
+		reverse_proxy api:8000
+	}
+
+	handle {
+		root * /srv/admin
+		try_files {path} /index.html
+		file_server
+	}
+}

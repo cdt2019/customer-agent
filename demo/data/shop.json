@@ -1,0 +1,147 @@
+{
+  "info": {
+    "name": "示例商店",
+    "brand": "EXAMPLE STORE",
+    "contacts": "Telegram：@example_support，邮箱：support@example.com",
+    "reply_hours": 12,
+    "hours": {
+      "utc_offset": 8,
+      "open": "09:00",
+      "close": "23:00"
+    },
+    "away_message": "现在是下班时间，客服每天 9:00–23:00（北京时间）在线，上班后按顺序回复。"
+  },
+  "widget": {
+    "theme": {
+      "brand": "#26c77d",
+      "brand_deep": "#1fb66f",
+      "brand_soft": "#eaf8f0",
+      "brand_ink": "#0b7a47",
+      "on_brand": "#052e1a"
+    }
+  },
+  "products": [
+    {
+      "name": "Microsoft 365 个人版 一年",
+      "cover": "Microsoft 365",
+      "price": "¥398.00",
+      "in_stock": true,
+      "delivery": "自动发货",
+      "warranty_days": 30,
+      "about": "微软官方兑换码，在 microsoft.com/redeem 兑换到你自己的微软账户，含 Word、Excel、PowerPoint 和 1TB OneDrive。",
+      "category": "办公软件",
+      "style": "sky",
+      "tagline": "官方兑换码 · 兑换到自己的账户"
+    },
+    {
+      "name": "Steam 钱包充值卡 $20",
+      "cover": "Steam",
+      "price": "¥149.00",
+      "in_stock": true,
+      "delivery": "自动发货",
+      "warranty_days": 7,
+      "about": "美区 Steam 钱包充值码，在 Steam 客户端「兑换 Steam 钱包充值码」里输入，金额进钱包余额。",
+      "category": "游戏",
+      "style": "slate",
+      "tagline": "美区 · 发充值码"
+    },
+    {
+      "name": "App Store 礼品卡 $20",
+      "cover": "App Store",
+      "price": "¥152.00",
+      "in_stock": true,
+      "delivery": "自动发货",
+      "warranty_days": 1,
+      "about": "美区 App Store 礼品卡代码，兑换后进 Apple 账户余额。",
+      "category": "礼品卡",
+      "style": "sand",
+      "tagline": "美区 · 发兑换码"
+    },
+    {
+      "name": "App Store 礼品卡 $50",
+      "cover": "App Store",
+      "price": "¥376.00",
+      "in_stock": false,
+      "delivery": "自动发货",
+      "warranty_days": 1,
+      "about": "美区 App Store 礼品卡代码，兑换后进 Apple 账户余额。",
+      "category": "礼品卡",
+      "style": "sand",
+      "tagline": "美区 · 发兑换码"
+    },
+    {
+      "name": "腾讯视频 VIP 月卡",
+      "cover": "腾讯视频",
+      "price": "¥25.00",
+      "in_stock": true,
+      "delivery": "自动发货",
+      "warranty_days": 30,
+      "about": "腾讯视频官方 VIP 兑换码，在腾讯视频 App「我的 - 兑换码」里兑换。",
+      "category": "影音会员",
+      "style": "mint",
+      "tagline": "官方兑换码"
+    },
+    {
+      "name": "网易云音乐 黑胶 VIP 年卡",
+      "cover": "网易云音乐",
+      "price": "¥158.00",
+      "in_stock": true,
+      "delivery": "人工交付",
+      "warranty_days": 30,
+      "about": "人工充值到你的网易云音乐账号，客服处理好后在订单页更新。",
+      "category": "影音会员",
+      "style": "mint",
+      "tagline": "人工充值 · 一般 2 小时内"
+    }
+  ],
+  "orders": {
+    "member-a": [
+      {
+        "order_no": "EX1001",
+        "product": "Microsoft 365 个人版 一年",
+        "status": "已交付",
+        "paid": true,
+        "delivered": true,
+        "delivered_days_ago": 4,
+        "open_ticket": null,
+        "card_secret": "TEST-CARD-AAAA-1111",
+        "email": "member-a@example.com"
+      },
+      {
+        "order_no": "EX1002",
+        "product": "腾讯视频 VIP 月卡",
+        "status": "待付款",
+        "paid": false,
+        "delivered": false,
+        "delivered_days_ago": null,
+        "open_ticket": null,
+        "card_secret": null,
+        "email": "member-a@example.com"
+      },
+      {
+        "order_no": "EX1003",
+        "product": "App Store 礼品卡 $20",
+        "status": "已交付",
+        "paid": true,
+        "delivered": true,
+        "delivered_days_ago": 30,
+        "open_ticket": null,
+        "card_secret": "TEST-GIFT-BBBB-2222",
+        "email": "member-a@example.com"
+      }
+    ],
+    "member-b": [
+      {
+        "order_no": "EX2001",
+        "product": "网易云音乐 黑胶 VIP 年卡",
+        "status": "处理中",
+        "paid": true,
+        "delivered": false,
+        "delivered_days_ago": null,
+        "open_ticket": "T20260001",
+        "card_secret": null,
+        "email": "member-b@example.com"
+      }
+    ]
+  }
+}

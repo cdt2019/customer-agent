@@ -1,0 +1,109 @@
+/* 设计令牌：颜色、圆角、阴影只在这里定义（docs/03 §2）。页面只用下面 @theme 生成的类。 */
+
+:root {
+  --ink: #14172b;
+  --ink-2: #545a78;
+  --ink-3: #8e93ad;
+  --blue: #2d5bff;
+  --blue-deep: #1b3fe0;
+  --blue-soft: #e8edff;
+  --chip: #eceefa;
+  --tile: #f6f7fd;
+  --hair: rgb(38 48 110 / 0.08);
+  --up: #12996a;
+  --down: #e0475c;
+  --warn: #9a6200;
+  --warn-soft: #fff3da;
+
+  /* shadcn 组件用的语义色，指到上面的令牌 */
+  --background: #fafbff;
+  --foreground: var(--ink);
+  --card: #ffffff;
+  --card-foreground: var(--ink);
+  --popover: #ffffff;
+  --popover-foreground: var(--ink);
+  --primary: var(--blue);
+  --primary-foreground: #ffffff;
+  --secondary: var(--chip);
+  --secondary-foreground: var(--ink-2);
+  --muted: var(--tile);
+  --muted-foreground: var(--ink-3);
+  --accent: var(--blue-soft);
+  --accent-foreground: var(--blue-deep);
+  --destructive: var(--down);
+  --border: var(--hair);
+  --input: #d5daf0;
+  --ring: var(--blue);
+  --radius: 0.75rem;
+}
+
+@theme inline {
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-ink-3: var(--ink-3);
+  --color-blue: var(--blue);
+  --color-blue-deep: var(--blue-deep);
+  --color-blue-soft: var(--blue-soft);
+  --color-chip: var(--chip);
+  --color-tile: var(--tile);
+  --color-hair: var(--hair);
+  --color-up: var(--up);
+  --color-down: var(--down);
+  --color-warn: var(--warn);
+  --color-warn-soft: var(--warn-soft);
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --radius-sm: 0.5rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.125rem;
+  --radius-2xl: 1.5rem;
+
+  --shadow-card: 0 1px 2px rgb(38 48 110 / 0.04), 0 12px 32px -14px rgb(38 48 110 / 0.18);
+  --shadow-blue: 0 14px 26px -12px rgb(36 76 245 / 0.6);
+
+  --font-sans: "Segoe UI", "Microsoft YaHei UI", "PingFang SC", sans-serif;
+  --font-num: "Segoe UI Variable Display", "Segoe UI", system-ui, sans-serif;
+}
+
+@layer base {
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+  body {
+    margin: 0;
+    overflow: hidden;
+    color: var(--ink);
+    font: 14px/1.55 var(--font-sans);
+    background: linear-gradient(180deg, #c6cbf0 0, #dfe2f7 150px, #f3f4fc 340px, #fafbff 100%) fixed;
+    -webkit-font-smoothing: antialiased;
+  }
+}
+
+@utility bg-brand {
+  background-image: linear-gradient(145deg, #4a76ff, var(--blue-deep));
+}
+
+@utility bg-hero {
+  background-image: radial-gradient(120% 160% at 88% 0, #6f92ff 0, transparent 56%), linear-gradient(105deg, #2f5eff, var(--blue-deep));
+}

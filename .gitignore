@@ -1,0 +1,13 @@
+.venv/
+__pycache__/
+*.pyc
+.env
+node_modules/
+dist/
+# 运行时数据：Qdrant 程序和存储、上传的原文件
+/var/
+.claude/settings.local.json
+
+# 本机的协作说明和启动配置
+CLAUDE.local.md
+.claude/

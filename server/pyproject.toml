@@ -1,0 +1,56 @@
+[project]
+name = "customer-agent"
+version = "0.0.0"
+description = "通用的知识库 + 客服服务"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "torch==2.14.1",
+    "torchvision==0.29.2",  # Docling 要用；列在这里是为了在 Linux 上和 torch 从同一个处理器源装，版本要配对
+    "sentence-transformers>=5",
+    "qdrant-client>=1.16",
+    "docling>=2.70",
+    "pypdfium2>=4",  # PDF 只取文字的解析器；Docling 也用它
+    "sqlalchemy>=2.0",
+    "psycopg[binary]>=3.2",
+    "alembic>=1.14",
+    "openai>=1.60",
+    "fastapi>=0.115",
+    "uvicorn>=0.34",
+    "python-multipart>=0.0.20",
+    "python-dotenv>=1.0",
+    "tzdata>=2025.1",  # 业务时区用 zoneinfo；精简的 Linux 镜像里不一定有系统时区数据
+]
+
+[project.scripts]
+agent = "customer_agent.cli:main"
+
+[dependency-groups]
+dev = ["pytest>=8"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/customer_agent"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+# 开发机的 GTX 1050 Ti（Pascal）只有 cu126 的安装包还支持；服务器上没有显卡，用处理器版（小得多）
+[tool.uv.sources]
+torch = [
+    { index = "pytorch-cu126", marker = "sys_platform == 'win32'" },
+    { index = "pytorch-cpu", marker = "sys_platform == 'linux'" },
+]
+torchvision = [{ index = "pytorch-cpu", marker = "sys_platform == 'linux'" }]
+
+[[tool.uv.index]]
+name = "pytorch-cu126"
+url = "https://download.pytorch.org/whl/cu126"
+explicit = true
+
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true

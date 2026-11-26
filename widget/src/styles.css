@@ -1,0 +1,77 @@
+/* 聊天窗的样式。颜色、圆角、阴影只在这里定义（docs/03 §2，和后台同一套值）。
+   挂在 Shadow DOM 里：宿主页面的样式进不来，这里的也出不去。
+   尺寸全用 px：rem 跟着宿主页面的根字号走，嵌到别人网站会变形。 */
+
+@import "tailwindcss";
+
+@theme {
+  --spacing: 4px;
+  --text-xs: 12px;
+  --text-sm: 13px;
+  --text-base: 14px;
+  --text-md: 15px;
+  --text-lg: 16px;
+
+  --color-ink: #14172b;
+  --color-ink-2: #545a78;
+  --color-ink-3: #8e93ad;
+  /* 主题色：接入方在配置里给 theme 时被覆盖（见 main.tsx），没给就是这套蓝 */
+  --color-brand: #2d5bff;
+  --color-brand-deep: #1b3fe0;
+  --color-brand-soft: #e8edff;
+  --color-brand-ink: #1b3fe0; /* 浅底上的主题色文字 */
+  --color-on-brand: #ffffff; /* 主题色底上的文字 */
+  --color-chip: #eceefa;
+  --color-tile: #f6f7fd;
+  --color-shell: #f7f8fe;
+  --color-line: #d5daf0;
+  --color-up: #12996a;
+  --color-up-soft: #e9f8f2;
+  --color-up-ink: #0e6b4a;
+  --color-down: #c2364a;
+  --color-warn-soft: #fff3da;
+  --color-warn-ink: #7a4e00;
+
+  --radius-sm: 8px;
+  --radius-md: 10px;
+  --radius-lg: 13px;
+  --radius-xl: 17px;
+  --radius-2xl: 20px;
+  --radius-3xl: 26px;
+
+  --shadow-bubble: 0 1px 2px rgb(38 48 110 / 0.07);
+  --shadow-input: 0 1px 3px rgb(38 48 110 / 0.1), 0 10px 20px -14px rgb(38 48 110 / 0.4);
+  --shadow-panel: 0 2px 6px rgb(38 48 110 / 0.08), 0 30px 60px -22px rgb(30 44 130 / 0.5);
+  --shadow-card: 0 1px 2px rgb(38 48 110 / 0.04), 0 12px 32px -14px rgb(38 48 110 / 0.18);
+  --shadow-brand: 0 14px 26px -12px color-mix(in srgb, var(--color-brand) 65%, transparent);
+
+  --font-sans: "Segoe UI", "Microsoft YaHei UI", "PingFang SC", system-ui, sans-serif;
+
+  --animate-hop: hop 1s infinite;
+  @keyframes hop {
+    0%, 60%, 100% { transform: none; opacity: 0.5; }
+    30% { transform: translateY(-3px); opacity: 1; }
+  }
+}
+
+:host {
+  all: initial;
+  display: block; /* 整页版要占满宿主给的高度 */
+  font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--color-ink);
+  -webkit-font-smoothing: antialiased;
+}
+
+.head-bg {
+  background: radial-gradient(100% 180% at 90% 0, color-mix(in srgb, white 35%, var(--color-brand)) 0, transparent 55%), linear-gradient(105deg, var(--color-brand), var(--color-brand-deep));
+}
+
+.brand-bg {
+  background: linear-gradient(110deg, var(--color-brand), var(--color-brand-deep));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-hop { animation: none; }
+}

@@ -1,0 +1,29 @@
+[project]
+name = "demo-shop"
+version = "0.0.0"
+description = "模拟店铺：代替接入方，提供店铺接口、签发访客令牌、转发对话"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "fastapi>=0.115",
+    "uvicorn>=0.34",
+    "httpx>=0.28",
+    "python-dotenv>=1.0",
+    "python-multipart>=0.0.20",  # 聊天窗发图片，转发给客服服务
+]
+
+[project.scripts]
+demo-shop = "demo_shop.cli:main"
+
+[dependency-groups]
+dev = ["pytest>=8"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["demo_shop"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+

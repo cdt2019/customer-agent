@@ -1,0 +1,87 @@
+# 一整套：客服服务、管理后台、PostgreSQL、Qdrant，加上代替接入方的模拟店铺。说明见 docs/06-部署.md。
+# 只有后台（经 Caddy）和模拟店铺发布端口，而且只发布在本机地址上；客服服务、数据库、Qdrant 只在内部网络里。
+name: customer-agent
+
+x-common: &common
+  restart: unless-stopped
+  cgroup_parent: ${CGROUP_PARENT:-customer-agent.slice}
+  logging:
+    driver: json-file
+    options: { max-size: 10m, max-file: "3" }
+
+services:
+  postgres:
+    <<: *common
+    image: postgres:18.6-alpine
+    environment:
+      POSTGRES_USER: customer_agent
+      POSTGRES_DB: customer_agent
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?}
+    volumes: [pgdata:/var/lib/postgresql]
+    mem_limit: 256m
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "customer_agent"]
+      interval: 5s
+      retries: 20
+
+  qdrant:
+    <<: *common
+    image: qdrant/qdrant:v1.20.2
+    environment:
+      QDRANT__SERVICE__API_KEY: ${QDRANT_API_KEY:?}
+      QDRANT__TELEMETRY_DISABLED: "true"
+    volumes: [qdrant:/qdrant/storage]
+    mem_limit: 384m
+
+  api:
+    <<: *common
+    image: customer-agent-server:${TAG:-latest}
+    build: { context: .., dockerfile: server/Dockerfile }
+    depends_on:
+      postgres: { condition: service_healthy }
+      qdrant: { condition: service_started }
+    environment:
+      DATABASE_URL: postgresql+psycopg://customer_agent:${POSTGRES_PASSWORD}@postgres/customer_agent
+      QDRANT_URL: http://qdrant:6333
+      QDRANT_API_KEY: ${QDRANT_API_KEY}
+      LLM_MODEL: ${LLM_MODEL:-deepseek-flash}
+      TIMEZONE: ${TIMEZONE:-Asia/Shanghai}
+      DEEPSEEK_API_KEY: ${DEEPSEEK_API_KEY:?}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:?}
+      ADMIN_COOKIE_SECURE: ${ADMIN_COOKIE_SECURE:-1}
+      SERVICE_API_KEY: ${SERVICE_API_KEY:?}
+      SHOP_URL: ${SHOP_URL:-http://demo:8100}
+      SHOP_API_KEY: ${SHOP_API_KEY:?}
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN:-}  # 不配就不启用 Telegram（docs/10）
+      TELEGRAM_INDEX_ID: ${TELEGRAM_INDEX_ID:-}
+    volumes: [data:/data]
+    mem_limit: 2800m  # bge-m3 在处理器上用全精度，约 2.2GB
+
+  admin:
+    <<: *common
+    image: caddy:2.11.7-alpine
+    depends_on: [api]
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - ../admin/dist:/srv/admin:ro
+    ports: ["127.0.0.1:${ADMIN_PORT:-18080}:80"]
+    mem_limit: 64m
+
+  demo:
+    <<: *common
+    image: customer-agent-demo:${TAG:-latest}
+    build: { context: .., dockerfile: demo/Dockerfile }
+    depends_on: [api]
+    environment:
+      AGENT_URL: http://api:8000
+      AGENT_KEY: ${SERVICE_API_KEY}
+      INDEX_ID: ${INDEX_ID:-1}
+      SHOP_API_KEY: ${SHOP_API_KEY}
+      TOKEN_SECRET: ${TOKEN_SECRET:?}
+    ports: ["127.0.0.1:${DEMO_PORT:-18100}:8100"]
+    mem_limit: 128m
+
+volumes:
+  pgdata:
+  qdrant:
+  data:
